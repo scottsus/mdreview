@@ -1,0 +1,42 @@
+{
+  "name": "@mdreview/mcp",
+  "version": "0.1.0",
+  "description": "MCP server for MDReview - markdown document review tool",
+  "type": "module",
+  "bin": {
+    "mdreview-mcp": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc && chmod +x dist/index.js",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@mdreview/typescript-config": "workspace:*",
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0"
+  },
+  "keywords": [
+    "mcp",
+    "markdown",
+    "review",
+    "ai",
+    "claude",
+    "cursor",
+    "opencode"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/scottsus/mdreview"
+  }
+}
