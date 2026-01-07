@@ -15,9 +15,9 @@ interface CommentSidebarProps {
   onThreadUpdated: (thread: Partial<ThreadResponse> & { id: string }) => void;
 }
 
-const MIN_WIDTH = 280;
-const MAX_WIDTH = 600;
-const DEFAULT_WIDTH = 400;
+const MIN_WIDTH = 320;
+const MAX_WIDTH = 800;
+const DEFAULT_WIDTH = 480;
 
 export function CommentSidebar({
   threads,
