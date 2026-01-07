@@ -59,12 +59,12 @@ export function CommentItem({ comment }: CommentItemProps) {
               {formatTime(comment.createdAt)}
             </span>
           </div>
-          <div className="relative">
+          <div className="relative overflow-hidden">
             <div
               ref={contentRef}
               className={cn(
-                "prose prose-sm prose-zinc dark:prose-invert max-w-none mt-1 transition-all duration-200 break-words overflow-hidden",
-                !isExpanded && needsExpansion && "max-h-[150px] overflow-hidden"
+                "prose prose-sm prose-zinc dark:prose-invert max-w-none mt-1 transition-all duration-200 break-words overflow-hidden [&>*]:max-w-full [&_pre]:overflow-x-auto [&_blockquote]:max-w-full",
+                !isExpanded && needsExpansion && "max-h-[150px]"
               )}
             >
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
