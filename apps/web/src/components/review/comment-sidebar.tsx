@@ -1,0 +1,83 @@
+"use client";
+
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { ThreadResponse } from "@/types";
+
+import { ThreadCard } from "./thread-card";
+
+interface CommentSidebarProps {
+  reviewId: string;
+  threads: ThreadResponse[];
+  activeThreadId: string | null;
+  onThreadClick: (threadId: string) => void;
+  onThreadUpdated: (thread: Partial<ThreadResponse> & { id: string }) => void;
+}
+
+export function CommentSidebar({
+  threads,
+  activeThreadId,
+  onThreadClick,
+  onThreadUpdated,
+}: CommentSidebarProps) {
+  return (
+    <div className="h-full flex flex-col border-l">
+      <div className="p-4 border-b">
+        <h2 className="font-semibold">Comments</h2>
+        <p className="text-sm text-muted-foreground">
+          {threads.length} thread{threads.length !== 1 ? "s" : ""}
+        </p>
+      </div>
+
+      <ScrollArea className="flex-1">
+        <div className="p-4 space-y-4">
+          {threads.map((thread) => (
+            <ThreadCard
+              key={thread.id}
+              thread={thread}
+              isActive={thread.id === activeThreadId}
+              onClick={() => onThreadClick(thread.id)}
+              onReply={async (body) => {
+                const response = await fetch(
+                  `/api/threads/${thread.id}/replies`,
+                  {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ body, authorType: "human" }),
+                  },
+                );
+                if (response.ok) {
+                  const comment = await response.json();
+                  onThreadUpdated({
+                    id: thread.id,
+                    comments: [...thread.comments, comment],
+                  });
+                }
+              }}
+              onResolve={async () => {
+                const response = await fetch(`/api/threads/${thread.id}`, {
+                  method: "PATCH",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ resolved: !thread.resolved }),
+                });
+                if (response.ok) {
+                  const updated = await response.json();
+                  onThreadUpdated({
+                    id: thread.id,
+                    resolved: updated.resolved,
+                    resolvedAt: updated.resolvedAt,
+                  });
+                }
+              }}
+            />
+          ))}
+
+          {threads.length === 0 && (
+            <p className="text-sm text-muted-foreground text-center py-8">
+              Hover over any block and click + to add a comment
+            </p>
+          )}
+        </div>
+      </ScrollArea>
+    </div>
+  );
+}
