@@ -46,6 +46,12 @@ interface SubmitDecisionResponse {
   decidedAt: string | null;
 }
 
+interface ResolveThreadResponse {
+  id: string;
+  resolved: boolean;
+  resolvedAt: string | null;
+}
+
 export class ApiClient {
   private baseUrl: string;
 
@@ -127,6 +133,21 @@ export class ApiClient {
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.message || "Failed to submit decision");
+    }
+
+    return response.json();
+  }
+
+  async resolveThread(threadId: string): Promise<ResolveThreadResponse> {
+    const response = await fetch(`${this.baseUrl}/api/threads/${threadId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ resolved: true }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Failed to resolve thread");
     }
 
     return response.json();

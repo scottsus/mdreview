@@ -9,7 +9,7 @@ import { ApiClient } from "./api-client.js";
 
 const server = new McpServer({
   name: "mdreview",
-  version: "0.3.0",
+  version: "0.4.0",
 });
 
 const apiClient = new ApiClient(process.env.MDREVIEW_BASE_URL);
@@ -84,7 +84,7 @@ server.registerTool(
         const comments = thread.comments
           .map((c) => `  - ${c.authorType}: ${c.body}`)
           .join("\n");
-        return `[${thread.resolved ? "RESOLVED" : "UNRESOLVED"}] "${thread.selectedText}"\n${comments}`;
+        return `[${thread.resolved ? "RESOLVED" : "UNRESOLVED"}] Thread: ${thread.id}\n"${thread.selectedText}"\n${comments}`;
       })
       .join("\n\n");
 
@@ -147,6 +147,36 @@ server.registerTool(
       structuredContent: {
         commentId: result.id,
         createdAt: result.createdAt,
+      } as Record<string, unknown>,
+    };
+  },
+);
+
+// Tool: resolve_thread
+server.registerTool(
+  "resolve_thread",
+  {
+    title: "Resolve Thread",
+    description:
+      "Mark a comment thread as resolved. Use this after addressing reviewer feedback.",
+    inputSchema: {
+      threadId: z.string().describe("The thread ID to resolve"),
+    },
+  },
+  async ({ threadId }) => {
+    const result = await apiClient.resolveThread(threadId);
+
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text: `Thread resolved successfully!\n\nThread ID: ${result.id}\nResolved at: ${result.resolvedAt}`,
+        },
+      ],
+      structuredContent: {
+        threadId: result.id,
+        resolved: result.resolved,
+        resolvedAt: result.resolvedAt,
       } as Record<string, unknown>,
     };
   },
