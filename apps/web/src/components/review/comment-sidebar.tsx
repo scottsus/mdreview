@@ -55,7 +55,7 @@ export function CommentSidebar({
 
   return (
     <div
-      className="h-full flex flex-col border-l relative"
+      className="h-full flex flex-col border-l relative flex-shrink-0"
       style={{ width: `${width}px` }}
     >
       {/* Drag handle */}

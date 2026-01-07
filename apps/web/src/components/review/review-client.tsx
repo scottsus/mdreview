@@ -94,9 +94,9 @@ export function ReviewClient({ initialReview }: ReviewClientProps) {
   );
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="h-screen bg-background pb-20 overflow-hidden">
       <div className="flex h-[calc(100vh-5rem)]">
-        <div className="flex-1 overflow-auto p-8">
+        <div className="flex-1 min-w-0 overflow-auto p-8">
           <div className="max-w-4xl mx-auto">
             <ReviewHeader
               title={review.title}
@@ -113,15 +113,13 @@ export function ReviewClient({ initialReview }: ReviewClientProps) {
           </div>
         </div>
 
-        <div className="w-96 h-full">
-          <CommentSidebar
-            reviewId={review.id}
-            threads={review.threads}
-            activeThreadId={activeThreadId}
-            onThreadClick={handleThreadClick}
-            onThreadUpdated={handleThreadUpdated}
-          />
-        </div>
+        <CommentSidebar
+          reviewId={review.id}
+          threads={review.threads}
+          activeThreadId={activeThreadId}
+          onThreadClick={handleThreadClick}
+          onThreadUpdated={handleThreadUpdated}
+        />
       </div>
 
       <ReviewActions
