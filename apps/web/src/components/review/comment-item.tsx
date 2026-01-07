@@ -4,6 +4,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { CommentResponse } from "@/types";
 import { Bot, User } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface CommentItemProps {
   comment: CommentResponse;
@@ -44,7 +46,11 @@ export function CommentItem({ comment }: CommentItemProps) {
               {formatTime(comment.createdAt)}
             </span>
           </div>
-          <p className="text-sm mt-1 whitespace-pre-wrap">{comment.body}</p>
+          <div className="prose prose-sm prose-zinc dark:prose-invert max-w-none mt-1">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {comment.body}
+            </ReactMarkdown>
+          </div>
         </div>
       </div>
     </div>
