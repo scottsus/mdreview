@@ -59,8 +59,10 @@ export function MarkdownViewer({
   onCreateThread,
 }: MarkdownViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const blocksRef = useRef<Array<{ startLine: number; endLine: number }>>([]);
-  const blockIndexRef = useRef(0);
+  
+  // Track blocks by position ID for stable indices (deterministic based on line numbers)
+  const blocksMapRef = useRef<Map<string, { index: number; startLine: number; endLine: number }>>(new Map());
+  const blockCounterRef = useRef(0);
 
   const [selectionState, setSelectionState] = useState<SelectionState>({
     isSelecting: false,
@@ -69,9 +71,29 @@ export function MarkdownViewer({
     finalSelection: null,
   });
 
-  // Reset block tracking on each render - use key to force clean state
-  blockIndexRef.current = 0;
-  blocksRef.current = [];
+  // Reset block tracking on each render (this is fine because we're building a deterministic map)
+  blocksMapRef.current = new Map();
+  blockCounterRef.current = 0;
+
+  // Helper to register a block and get its index - deterministic based on position
+  const registerBlock = useCallback((startLine: number, endLine: number): number => {
+    const blockId = `L${startLine}-${endLine}`;
+    const existing = blocksMapRef.current.get(blockId);
+    if (existing) {
+      return existing.index;
+    }
+    const index = blockCounterRef.current++;
+    blocksMapRef.current.set(blockId, { index, startLine, endLine });
+    return index;
+  }, []);
+
+  // Helper to get block info by index
+  const getBlockByIndex = useCallback((index: number) => {
+    for (const block of blocksMapRef.current.values()) {
+      if (block.index === index) return block;
+    }
+    return null;
+  }, []);
 
   const selectedRange = useMemo(() => {
     const { anchorBlockIndex, focusBlockIndex } = selectionState;
@@ -156,9 +178,8 @@ export function MarkdownViewer({
     if (!selectionState.isSelecting) return;
 
     if (selectedRange) {
-      const blocks = blocksRef.current;
-      const startBlock = blocks[selectedRange.start];
-      const endBlock = blocks[selectedRange.end];
+      const startBlock = getBlockByIndex(selectedRange.start);
+      const endBlock = getBlockByIndex(selectedRange.end);
 
       if (startBlock && endBlock) {
         const blockContents: string[] = [];
@@ -194,7 +215,7 @@ export function MarkdownViewer({
       focusBlockIndex: null,
       finalSelection: null,
     });
-  }, [selectionState.isSelecting, selectedRange]);
+  }, [selectionState.isSelecting, selectedRange, getBlockByIndex]);
 
   const handleCommentSubmit = useCallback(
     async (body: string) => {
@@ -283,8 +304,7 @@ export function MarkdownViewer({
           return <Tag {...rest}>{children}</Tag>;
         }
 
-        const blockIndex = blockIndexRef.current++;
-        blocksRef.current[blockIndex] = { startLine, endLine };
+        const blockIndex = registerBlock(startLine, endLine);
 
         const threadIds = getThreadsForRange(startLine, endLine);
         const hasThread = threadIds.length > 0;
@@ -368,6 +388,7 @@ export function MarkdownViewer({
       handleCommentSubmit,
       handleCommentCancel,
       onThreadClick,
+      registerBlock,
       selectedRange,
       selectionState.isSelecting,
       selectionState.finalSelection,
@@ -386,8 +407,7 @@ export function MarkdownViewer({
         const position = node?.position;
         const startLine = position?.start?.line ?? 1;
         const endLine = position?.end?.line ?? 1;
-        const blockIndex = blockIndexRef.current++;
-        blocksRef.current[blockIndex] = { startLine, endLine };
+        const blockIndex = registerBlock(startLine, endLine);
 
         return (
           <CommentableBlock
@@ -419,17 +439,12 @@ export function MarkdownViewer({
       const position = node?.position;
       const sourceStartLine = (position?.start?.line ?? 0) + 1;
 
-      const firstBlockIndex = blockIndexRef.current;
-
       return (
         <CodeBlockWithLines
           code={codeContent}
           language={language}
           sourceStartLine={sourceStartLine}
-          getNextBlockIndex={() => blockIndexRef.current++}
-          registerBlock={(index, start, end) => {
-            blocksRef.current[index] = { startLine: start, endLine: end };
-          }}
+          getBlockIndex={(sourceLine: number) => registerBlock(sourceLine, sourceLine)}
           selectedRange={selectedRange}
           isSelecting={selectionState.isSelecting}
           finalSelection={selectionState.finalSelection}
@@ -474,6 +489,7 @@ export function MarkdownViewer({
       handleCommentSubmit,
       handleCommentCancel,
       onThreadClick,
+      registerBlock,
       selectedRange,
       selectionState.isSelecting,
       selectionState.finalSelection,

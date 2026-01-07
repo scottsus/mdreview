@@ -67,3 +67,12 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Fix Radix ScrollArea viewport width constraint
+ * The ScrollArea uses display: table internally which breaks width constraints
+ * https://github.com/radix-ui/primitives/issues/2722
+ */
+[data-radix-scroll-area-viewport] > div {
+  display: block !important;
+  max-width: 100%;
+}

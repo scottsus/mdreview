@@ -10,8 +10,7 @@ interface CodeBlockWithLinesProps {
   language: string;
   sourceStartLine: number;
 
-  getNextBlockIndex: () => number;
-  registerBlock: (index: number, startLine: number, endLine: number) => void;
+  getBlockIndex: (sourceLine: number) => number;
 
   selectedRange: { start: number; end: number } | null;
   isSelecting: boolean;
@@ -42,8 +41,7 @@ export function CodeBlockWithLines({
   code,
   language,
   sourceStartLine,
-  getNextBlockIndex,
-  registerBlock,
+  getBlockIndex,
   selectedRange,
   isSelecting,
   finalSelection,
@@ -60,10 +58,8 @@ export function CodeBlockWithLines({
         const elements: React.ReactNode[] = [];
 
         tokens.forEach((line, lineIndex) => {
-          const blockIndex = getNextBlockIndex();
           const sourceLine = sourceStartLine + lineIndex;
-
-          registerBlock(blockIndex, sourceLine, sourceLine);
+          const blockIndex = getBlockIndex(sourceLine);
 
           // Add the code line
           elements.push(

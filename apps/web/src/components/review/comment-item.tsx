@@ -63,7 +63,12 @@ export function CommentItem({ comment }: CommentItemProps) {
             <div
               ref={contentRef}
               className={cn(
-                "prose prose-sm prose-zinc dark:prose-invert max-w-none mt-1 transition-all duration-200 break-words overflow-hidden [&>*]:max-w-full [&_pre]:overflow-x-auto [&_blockquote]:max-w-full",
+                "prose prose-sm prose-zinc dark:prose-invert max-w-none mt-1 transition-all duration-200",
+                "break-words overflow-hidden",
+                "[&>*]:max-w-full [&_*]:max-w-full",
+                "[&_code]:break-all [&_code]:whitespace-pre-wrap",
+                "[&_pre]:overflow-x-auto [&_pre]:max-w-full [&_pre]:my-2",
+                "[&_blockquote]:pl-3 [&_blockquote]:my-2 [&_blockquote]:max-w-full",
                 !isExpanded && needsExpansion && "max-h-[150px]"
               )}
             >

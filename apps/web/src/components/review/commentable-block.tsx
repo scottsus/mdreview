@@ -64,7 +64,6 @@ export function CommentableBlock({
       data-block-index={blockIndex}
       data-start-line={startLine}
       data-end-line={endLine}
-      suppressHydrationWarning
       onPointerDown={onPointerDown}
       onMouseEnter={() => !isSelecting && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
