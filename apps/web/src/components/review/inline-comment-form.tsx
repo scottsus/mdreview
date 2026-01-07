@@ -88,8 +88,14 @@ export function InlineCommentForm({
           <Textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
+            onKeyDown={(e) => {
+              if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                e.preventDefault();
+                handleSubmit();
+              }
+            }}
             placeholder="Leave a comment"
-            className="min-h-[100px] resize-none border-muted"
+            className="min-h-[100px] resize-none border-muted text-gray-900 dark:text-gray-100"
             autoFocus
           />
         </TabsContent>

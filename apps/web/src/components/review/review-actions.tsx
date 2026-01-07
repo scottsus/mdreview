@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { AlertCircle, Check, Download, X } from "lucide-react";
+import { AlertCircle, Check, Download } from "lucide-react";
 import { useState } from "react";
 
 interface ReviewActionsProps {
@@ -19,7 +19,7 @@ interface ReviewActionsProps {
   onExport: (format: "yaml" | "json") => void;
 }
 
-type ActionType = "approved" | "changes_requested" | "rejected" | null;
+type ActionType = "approved" | "changes_requested" | null;
 
 export function ReviewActions({
   reviewId,
@@ -92,14 +92,6 @@ export function ReviewActions({
                 Request Changes
               </Button>
               <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => setSelectedAction("rejected")}
-              >
-                <X className="h-4 w-4 mr-1" />
-                Reject
-              </Button>
-              <Button
                 variant="default"
                 size="sm"
                 onClick={() => setSelectedAction("approved")}
@@ -127,7 +119,6 @@ export function ReviewActions({
             <DialogTitle>
               {selectedAction === "approved" && "Approve Review"}
               {selectedAction === "changes_requested" && "Request Changes"}
-              {selectedAction === "rejected" && "Reject Review"}
             </DialogTitle>
           </DialogHeader>
 
@@ -145,13 +136,7 @@ export function ReviewActions({
             <Button variant="outline" onClick={() => setSelectedAction(null)}>
               Cancel
             </Button>
-            <Button
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-              variant={
-                selectedAction === "rejected" ? "destructive" : "default"
-              }
-            >
+            <Button onClick={handleSubmit} disabled={isSubmitting}>
               {isSubmitting ? "Submitting..." : "Confirm"}
             </Button>
           </DialogFooter>
