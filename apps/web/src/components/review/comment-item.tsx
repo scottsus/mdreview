@@ -67,6 +67,7 @@ export function CommentItem({ comment }: CommentItemProps) {
                 "break-words overflow-hidden",
                 "[&>*]:max-w-full [&_*]:max-w-full",
                 "[&_code]:break-all [&_code]:whitespace-pre-wrap",
+                "[&_code:not(pre_code)]:bg-zinc-100 [&_code:not(pre_code)]:dark:bg-zinc-800 [&_code:not(pre_code)]:px-1.5 [&_code:not(pre_code)]:py-0.5 [&_code:not(pre_code)]:rounded [&_code:not(pre_code)]:text-sm [&_code:not(pre_code)]:font-normal [&_code:not(pre_code)]:before:content-none [&_code:not(pre_code)]:after:content-none",
                 "[&_pre]:overflow-x-auto [&_pre]:max-w-full [&_pre]:my-2",
                 "[&_blockquote]:pl-3 [&_blockquote]:my-2 [&_blockquote]:max-w-full",
                 !isExpanded && needsExpansion && "max-h-[150px]"

@@ -127,6 +127,12 @@ export function ReviewActions({
             <Textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={(e) => {
+                if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                  e.preventDefault();
+                  handleSubmit();
+                }
+              }}
               placeholder="Add a message for the author..."
               className="mt-2"
             />
