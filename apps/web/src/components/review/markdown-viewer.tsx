@@ -69,7 +69,7 @@ export function MarkdownViewer({
     finalSelection: null,
   });
 
-  // Reset block tracking on each render
+  // Reset block tracking on each render - use key to force clean state
   blockIndexRef.current = 0;
   blocksRef.current = [];
 

@@ -17,11 +17,7 @@ interface CommentSidebarProps {
 
 const MIN_WIDTH = 280;
 const MAX_WIDTH = 600;
-
-function getDefaultWidth() {
-  if (typeof window === "undefined") return 400;
-  return Math.min(Math.max(window.innerWidth * 0.4, MIN_WIDTH), MAX_WIDTH);
-}
+const DEFAULT_WIDTH = 400;
 
 export function CommentSidebar({
   threads,
@@ -29,8 +25,13 @@ export function CommentSidebar({
   onThreadClick,
   onThreadUpdated,
 }: CommentSidebarProps) {
-  const [width, setWidth] = useState(getDefaultWidth);
+  const [width, setWidth] = useState(DEFAULT_WIDTH);
   const [isDragging, setIsDragging] = useState(false);
+
+  useEffect(() => {
+    const targetWidth = Math.min(Math.max(window.innerWidth * 0.4, MIN_WIDTH), MAX_WIDTH);
+    setWidth(targetWidth);
+  }, []);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
