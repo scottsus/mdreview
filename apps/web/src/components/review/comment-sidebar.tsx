@@ -80,7 +80,7 @@ export function CommentSidebar({
       </div>
 
       <ScrollArea className="flex-1">
-        <div className="p-4 space-y-4">
+        <div className="p-4 pr-5 space-y-4 overflow-hidden">
           {threads.map((thread) => (
             <ThreadCard
               key={thread.id}

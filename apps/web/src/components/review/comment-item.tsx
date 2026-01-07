@@ -63,7 +63,7 @@ export function CommentItem({ comment }: CommentItemProps) {
             <div
               ref={contentRef}
               className={cn(
-                "prose prose-sm prose-zinc dark:prose-invert max-w-none mt-1 transition-all duration-200",
+                "prose prose-sm prose-zinc dark:prose-invert max-w-none mt-1 transition-all duration-200 break-words overflow-hidden",
                 !isExpanded && needsExpansion && "max-h-[150px] overflow-hidden"
               )}
             >
