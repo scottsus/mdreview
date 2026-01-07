@@ -9,7 +9,7 @@ import { ApiClient } from "./api-client.js";
 
 const server = new McpServer({
   name: "mdreview",
-  version: "0.2.0",
+  version: "0.3.0",
 });
 
 const apiClient = new ApiClient(process.env.MDREVIEW_BASE_URL);
@@ -23,10 +23,9 @@ server.registerTool(
       "Create a markdown document review and get a shareable URL. Share this URL with the reviewer and they can add inline comments and approve/reject the document.",
     inputSchema: {
       filePath: z.string().describe("The path to the markdown file to review"),
-      title: z.string().optional().describe("Optional title for the review"),
     },
   },
-  async ({ filePath, title }) => {
+  async ({ filePath }) => {
     let content: string;
     try {
       content = fs.readFileSync(filePath, "utf-8");
@@ -44,13 +43,13 @@ server.registerTool(
       };
     }
 
-    const result = await apiClient.createReview(content, title);
+    const result = await apiClient.createReview(content);
 
     return {
       content: [
         {
           type: "text" as const,
-          text: `Review created successfully!\n\nReview URL: ${result.url}\n\nShare this URL with your reviewer. They can:\n- Add inline comments by selecting text\n- Approve, reject, or request changes\n\nUse 'wait_for_review' with reviewId "${result.id}" to wait for the review to complete.`,
+          text: `Review created successfully!\n\nReview URL: ${result.url}\n\nShare this URL with your reviewer. They can:\n- Add inline comments by selecting text\n- Approve, reject, or request changes\n\nUse 'get_review_status' with reviewId "${result.id}" to check the review status.`,
         },
       ],
       structuredContent: {
@@ -58,62 +57,6 @@ server.registerTool(
         url: result.url,
         status: result.status,
       } as Record<string, unknown>,
-    };
-  },
-);
-
-// Tool: wait_for_review
-server.registerTool(
-  "wait_for_review",
-  {
-    title: "Wait for Review",
-    description:
-      "Wait for a review to be completed (approved, rejected, or changes requested). This will block until the reviewer makes a decision or the timeout is reached.",
-    inputSchema: {
-      reviewId: z.string().describe("The review ID to wait for"),
-      timeoutSeconds: z
-        .number()
-        .min(1)
-        .max(300)
-        .default(300)
-        .describe("Maximum time to wait in seconds (default: 300)"),
-    },
-  },
-  async ({ reviewId, timeoutSeconds }) => {
-    const result = await apiClient.waitForReview(reviewId, timeoutSeconds);
-
-    if (result.status === "pending") {
-      return {
-        content: [
-          {
-            type: "text" as const,
-            text: `Review is still pending after ${timeoutSeconds} seconds. You can call wait_for_review again to continue waiting.`,
-          },
-        ],
-        structuredContent: { status: "pending", timedOut: true } as Record<
-          string,
-          unknown
-        >,
-      };
-    }
-
-    const commentsText = result.threads
-      .map((thread) => {
-        const comments = thread.comments
-          .map((c) => `  - ${c.authorType}: ${c.body}`)
-          .join("\n");
-        return `[${thread.resolved ? "RESOLVED" : "UNRESOLVED"}] "${thread.selectedText}"\n${comments}`;
-      })
-      .join("\n\n");
-
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: `Review completed!\n\nStatus: ${result.status.toUpperCase()}\nMessage: ${result.decisionMessage || "(none)"}\n\nSummary:\n- Total threads: ${result.summary.totalThreads}\n- Resolved: ${result.summary.resolvedThreads}\n- Unresolved: ${result.summary.unresolvedThreads}\n- Total comments: ${result.summary.totalComments}\n\n${commentsText ? `Comments:\n${commentsText}` : "No comments."}`,
-        },
-      ],
-      structuredContent: { ...result } as Record<string, unknown>,
     };
   },
 );
@@ -204,6 +147,44 @@ server.registerTool(
       structuredContent: {
         commentId: result.id,
         createdAt: result.createdAt,
+      } as Record<string, unknown>,
+    };
+  },
+);
+
+// Tool: submit_decision
+server.registerTool(
+  "submit_decision",
+  {
+    title: "Submit Decision",
+    description:
+      "Submit a review decision (approve, reject, or request changes). Use this to finalize a review.",
+    inputSchema: {
+      reviewId: z.string().describe("The review ID"),
+      decision: z
+        .enum(["approved", "rejected", "changes_requested"])
+        .describe("The decision"),
+      message: z
+        .string()
+        .optional()
+        .describe("Optional message explaining the decision"),
+    },
+  },
+  async ({ reviewId, decision, message }) => {
+    const result = await apiClient.submitDecision(reviewId, decision, message);
+
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text: `Decision submitted successfully!\n\nReview ID: ${result.id}\nDecision: ${result.status.toUpperCase()}\nMessage: ${result.decisionMessage || "(none)"}`,
+        },
+      ],
+      structuredContent: {
+        reviewId: result.id,
+        status: result.status,
+        decisionMessage: result.decisionMessage,
+        decidedAt: result.decidedAt,
       } as Record<string, unknown>,
     };
   },

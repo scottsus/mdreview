@@ -39,18 +39,11 @@ interface CommentResponse {
   createdAt: string;
 }
 
-interface WaitResponse {
+interface SubmitDecisionResponse {
   id: string;
   status: string;
   decisionMessage: string | null;
   decidedAt: string | null;
-  threads: ThreadResponse[];
-  summary: {
-    totalThreads: number;
-    resolvedThreads: number;
-    unresolvedThreads: number;
-    totalComments: number;
-  };
 }
 
 export class ApiClient {
@@ -60,16 +53,12 @@ export class ApiClient {
     this.baseUrl = baseUrl || BASE_URL;
   }
 
-  async createReview(
-    content: string,
-    title?: string,
-  ): Promise<CreateReviewResponse> {
+  async createReview(content: string): Promise<CreateReviewResponse> {
     const response = await fetch(`${this.baseUrl}/api/reviews`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         content,
-        title,
         source: "agent",
       }),
     });
@@ -99,22 +88,6 @@ export class ApiClient {
     return response.json();
   }
 
-  async waitForReview(
-    reviewId: string,
-    timeoutSeconds = 300,
-  ): Promise<WaitResponse> {
-    const response = await fetch(
-      `${this.baseUrl}/api/reviews/${reviewId}/wait?timeout=${timeoutSeconds}`,
-    );
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || "Failed to wait for review");
-    }
-
-    return response.json();
-  }
-
   async addComment(threadId: string, body: string): Promise<CommentResponse> {
     const response = await fetch(
       `${this.baseUrl}/api/threads/${threadId}/replies`,
@@ -132,6 +105,28 @@ export class ApiClient {
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.message || "Failed to add comment");
+    }
+
+    return response.json();
+  }
+
+  async submitDecision(
+    reviewId: string,
+    decision: "approved" | "rejected" | "changes_requested",
+    message?: string,
+  ): Promise<SubmitDecisionResponse> {
+    const response = await fetch(
+      `${this.baseUrl}/api/reviews/${reviewId}/submit`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ decision, message }),
+      },
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Failed to submit decision");
     }
 
     return response.json();
