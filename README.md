@@ -1,8 +1,10 @@
 # MDReview
 
-A standalone SaaS for collaborative markdown document review with inline commenting.
+> This project was generated entirely using AI
 
-![Screenshot](screenshot.png)
+![alt text](assets/screenshot.png)
+
+A standalone SaaS for collaborative markdown document review with inline commenting.
 
 MDReview allows you to upload markdown content, share a unique review URL, and collect structured feedback from reviewers. It supports both block-level and line-level commenting, making it ideal for everything from blog posts to technical documentation.
 
@@ -48,17 +50,20 @@ mdreview/
 ### Installation
 
 1. Clone the repository and install dependencies:
+
    ```bash
    pnpm install
    ```
 
 2. Set up the environment variables:
+
    ```bash
    cp apps/web/.env.example apps/web/.env.local
    # Edit apps/web/.env.local and add your DATABASE_URL
    ```
 
 3. Initialize the database:
+
    ```bash
    pnpm db:push
    ```

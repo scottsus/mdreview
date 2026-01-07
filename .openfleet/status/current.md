@@ -19,6 +19,7 @@ MDReview initial build is complete. Pending:
 
 ## Active Tasks
 
+- [x] Create project README.md
 - [ ] Fix Drizzle schema type errors
 - [ ] Deploy web app to Vercel
 - [ ] Publish @mdreview/mcp to npm
