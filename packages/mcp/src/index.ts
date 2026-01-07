@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import fs from "fs";
+
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
@@ -7,7 +9,7 @@ import { ApiClient } from "./api-client.js";
 
 const server = new McpServer({
   name: "mdreview",
-  version: "0.1.0",
+  version: "0.2.0",
 });
 
 const apiClient = new ApiClient(process.env.MDREVIEW_BASE_URL);
@@ -20,11 +22,28 @@ server.registerTool(
     description:
       "Create a markdown document review and get a shareable URL. Share this URL with the reviewer and they can add inline comments and approve/reject the document.",
     inputSchema: {
-      content: z.string().describe("The markdown content to review"),
+      filePath: z.string().describe("The path to the markdown file to review"),
       title: z.string().optional().describe("Optional title for the review"),
     },
   },
-  async ({ content, title }) => {
+  async ({ filePath, title }) => {
+    let content: string;
+    try {
+      content = fs.readFileSync(filePath, "utf-8");
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Unknown error reading file";
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: `Error: Failed to read file at "${filePath}"\n\n${message}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+
     const result = await apiClient.createReview(content, title);
 
     return {
@@ -108,26 +127,54 @@ server.registerTool(
       "Get the current status of a review without waiting. Use this to check if a review has been completed.",
     inputSchema: {
       reviewId: z.string().describe("The review ID to check"),
+      includeContent: z
+        .boolean()
+        .default(false)
+        .describe("Include the full markdown content in the response"),
     },
   },
-  async ({ reviewId }) => {
-    const result = await apiClient.getReview(reviewId);
+  async ({ reviewId, includeContent }) => {
+    const result = await apiClient.getReview(reviewId, includeContent);
+
+    const commentsText = result.threads
+      .map((thread) => {
+        const comments = thread.comments
+          .map((c) => `  - ${c.authorType}: ${c.body}`)
+          .join("\n");
+        return `[${thread.resolved ? "RESOLVED" : "UNRESOLVED"}] "${thread.selectedText}"\n${comments}`;
+      })
+      .join("\n\n");
+
+    const summary = {
+      totalThreads: result.threads.length,
+      resolvedThreads: result.threads.filter((t) => t.resolved).length,
+      unresolvedThreads: result.threads.filter((t) => !t.resolved).length,
+      totalComments: result.threads.reduce(
+        (sum, t) => sum + t.comments.length,
+        0,
+      ),
+    };
+
+    const structuredContent: Record<string, unknown> = {
+      status: result.status,
+      decisionMessage: result.decisionMessage,
+      decidedAt: result.decidedAt,
+      threads: result.threads,
+      summary,
+    };
+
+    if (includeContent) {
+      structuredContent.content = result.content;
+    }
 
     return {
       content: [
         {
           type: "text" as const,
-          text: `Review Status: ${result.status.toUpperCase()}\nTitle: ${result.title || "(untitled)"}\nThreads: ${result.threads.length}\nURL: ${result.url}`,
+          text: `Review Status: ${result.status.toUpperCase()}\nTitle: ${result.title || "(untitled)"}\nMessage: ${result.decisionMessage || "(none)"}\nURL: ${result.url}\n\nSummary:\n- Total threads: ${summary.totalThreads}\n- Resolved: ${summary.resolvedThreads}\n- Unresolved: ${summary.unresolvedThreads}\n- Total comments: ${summary.totalComments}\n\n${commentsText ? `Comments:\n${commentsText}` : "No comments."}`,
         },
       ],
-      structuredContent: {
-        status: result.status,
-        threadCount: result.threads.length,
-        commentCount: result.threads.reduce(
-          (sum, t) => sum + t.comments.length,
-          0,
-        ),
-      } as Record<string, unknown>,
+      structuredContent,
     };
   },
 );

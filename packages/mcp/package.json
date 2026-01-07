@@ -1,6 +1,6 @@
 {
-  "name": "@mdreview/mcp",
-  "version": "0.1.0",
+  "name": "@scottsus/mdreview-mcp",
+  "version": "0.2.0",
   "description": "MCP server for MDReview - markdown document review tool",
   "type": "module",
   "bin": {
