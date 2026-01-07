@@ -3,17 +3,30 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { CommentResponse } from "@/types";
-import { Bot, User } from "lucide-react";
+import { Bot, ChevronDown, ChevronUp, User } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+
+const MAX_COLLAPSED_HEIGHT = 150;
 
 interface CommentItemProps {
   comment: CommentResponse;
 }
 
 export function CommentItem({ comment }: CommentItemProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [needsExpansion, setNeedsExpansion] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
+
   const isAgent = comment.authorType === "agent";
   const displayName = comment.authorName || (isAgent ? "AI Agent" : "Reviewer");
+
+  useEffect(() => {
+    if (contentRef.current) {
+      setNeedsExpansion(contentRef.current.scrollHeight > MAX_COLLAPSED_HEIGHT);
+    }
+  }, [comment.body]);
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -46,11 +59,40 @@ export function CommentItem({ comment }: CommentItemProps) {
               {formatTime(comment.createdAt)}
             </span>
           </div>
-          <div className="prose prose-sm prose-zinc dark:prose-invert max-w-none mt-1">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {comment.body}
-            </ReactMarkdown>
+          <div className="relative">
+            <div
+              ref={contentRef}
+              className={cn(
+                "prose prose-sm prose-zinc dark:prose-invert max-w-none mt-1 transition-all duration-200",
+                !isExpanded && needsExpansion && "max-h-[150px] overflow-hidden"
+              )}
+            >
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {comment.body}
+              </ReactMarkdown>
+            </div>
+            {!isExpanded && needsExpansion && (
+              <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-background to-transparent pointer-events-none" />
+            )}
           </div>
+          {needsExpansion && (
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="flex items-center gap-1 mt-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {isExpanded ? (
+                <>
+                  <ChevronUp className="h-3 w-3" />
+                  Show less
+                </>
+              ) : (
+                <>
+                  <ChevronDown className="h-3 w-3" />
+                  Show more
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
     </div>
