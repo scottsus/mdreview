@@ -77,14 +77,8 @@ export class ApiClient {
     return response.json();
   }
 
-  async getReview(
-    reviewId: string,
-    includeContent = false,
-  ): Promise<ReviewResponse> {
-    const url = includeContent
-      ? `${this.baseUrl}/api/reviews/${reviewId}?includeContent=true`
-      : `${this.baseUrl}/api/reviews/${reviewId}`;
-    const response = await fetch(url);
+  async getReview(reviewId: string): Promise<ReviewResponse> {
+    const response = await fetch(`${this.baseUrl}/api/reviews/${reviewId}`);
 
     if (!response.ok) {
       const error = await response.json();

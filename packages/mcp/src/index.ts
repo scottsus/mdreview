@@ -70,14 +70,10 @@ server.registerTool(
       "Get the current status of a review without waiting. Use this to check if a review has been completed.",
     inputSchema: {
       reviewId: z.string().describe("The review ID to check"),
-      includeContent: z
-        .boolean()
-        .default(false)
-        .describe("Include the full markdown content in the response"),
     },
   },
-  async ({ reviewId, includeContent }) => {
-    const result = await apiClient.getReview(reviewId, includeContent);
+  async ({ reviewId }) => {
+    const result = await apiClient.getReview(reviewId);
 
     const commentsText = result.threads
       .map((thread) => {
@@ -98,18 +94,6 @@ server.registerTool(
       ),
     };
 
-    const structuredContent: Record<string, unknown> = {
-      status: result.status,
-      decisionMessage: result.decisionMessage,
-      decidedAt: result.decidedAt,
-      threads: result.threads,
-      summary,
-    };
-
-    if (includeContent) {
-      structuredContent.content = result.content;
-    }
-
     return {
       content: [
         {
@@ -117,7 +101,14 @@ server.registerTool(
           text: `Review Status: ${result.status.toUpperCase()}\nTitle: ${result.title || "(untitled)"}\nMessage: ${result.decisionMessage || "(none)"}\nURL: ${result.url}\n\nSummary:\n- Total threads: ${summary.totalThreads}\n- Resolved: ${summary.resolvedThreads}\n- Unresolved: ${summary.unresolvedThreads}\n- Total comments: ${summary.totalComments}\n\n${commentsText ? `Comments:\n${commentsText}` : "No comments."}`,
         },
       ],
-      structuredContent,
+      structuredContent: {
+        status: result.status,
+        content: result.content,
+        decisionMessage: result.decisionMessage,
+        decidedAt: result.decidedAt,
+        threads: result.threads,
+        summary,
+      } as Record<string, unknown>,
     };
   },
 );

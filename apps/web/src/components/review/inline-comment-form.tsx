@@ -4,16 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { BlockSelection } from "@/types";
-import {
-  Bold,
-  Code,
-  Heading,
-  Italic,
-  Link,
-  List,
-  ListOrdered,
-  Quote,
-} from "lucide-react";
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -59,30 +49,14 @@ export function InlineCommentForm({
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="p-3">
-        <div className="flex items-center justify-between mb-2">
-          <TabsList className="h-8">
-            <TabsTrigger value="write" className="text-xs px-3 py-1">
-              Write
-            </TabsTrigger>
-            <TabsTrigger value="preview" className="text-xs px-3 py-1">
-              Preview
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Toolbar */}
-          <div className="flex items-center gap-0.5">
-            <ToolbarButton icon={Heading} title="Heading" />
-            <ToolbarButton icon={Bold} title="Bold" />
-            <ToolbarButton icon={Italic} title="Italic" />
-            <div className="w-px h-4 bg-border mx-1" />
-            <ToolbarButton icon={Code} title="Code" />
-            <ToolbarButton icon={Link} title="Link" />
-            <div className="w-px h-4 bg-border mx-1" />
-            <ToolbarButton icon={List} title="Bullet list" />
-            <ToolbarButton icon={ListOrdered} title="Numbered list" />
-            <ToolbarButton icon={Quote} title="Quote" />
-          </div>
-        </div>
+        <TabsList className="h-8 mb-2">
+          <TabsTrigger value="write" className="text-xs px-3 py-1">
+            Write
+          </TabsTrigger>
+          <TabsTrigger value="preview" className="text-xs px-3 py-1">
+            Preview
+          </TabsTrigger>
+        </TabsList>
 
         <TabsContent value="write" className="mt-0">
           <Textarea
@@ -129,24 +103,5 @@ export function InlineCommentForm({
         </Button>
       </div>
     </div>
-  );
-}
-
-function ToolbarButton({
-  icon: Icon,
-  title,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  title: string;
-}) {
-  return (
-    <button
-      type="button"
-      title={title}
-      className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-      onClick={(e) => e.preventDefault()}
-    >
-      <Icon className="h-3.5 w-3.5" />
-    </button>
   );
 }
