@@ -1,9 +1,10 @@
 "use client";
 
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { reviewApi } from "@/lib/api-service";
 import { BlockSelection, ReviewResponse, ThreadResponse } from "@/types";
 import { useCallback, useState } from "react";
-
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { toast } from "sonner";
 
 import { CommentSidebar } from "./comment-sidebar";
 import { MarkdownViewer } from "./markdown-viewer";
@@ -55,41 +56,38 @@ export function ReviewClient({ initialReview }: ReviewClientProps) {
 
   const handleExport = useCallback(
     async (format: "yaml" | "json") => {
-      const response = await fetch(
-        `/api/reviews/${review.id}/export?format=${format}`,
-      );
-      if (!response.ok) return;
-
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `review-${review.slug}.${format}`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      try {
+        const blob = await reviewApi.exportReview(review.id, format);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `review-${review.slug}.${format}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (error) {
+        toast.error("Failed to export review");
+        console.error("Export error:", error);
+      }
     },
     [review.id, review.slug],
   );
 
   const handleCreateThread = useCallback(
     async (selection: BlockSelection, body: string) => {
-      const response = await fetch(`/api/reviews/${review.id}/threads`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      try {
+        const thread = await reviewApi.createThread(review.id, {
           startLine: selection.startLine,
           endLine: selection.endLine,
           selectedText: selection.blockContent,
           body,
           authorType: "human",
-        }),
-      });
-
-      if (response.ok) {
-        const thread = await response.json();
+        });
         handleThreadCreated(thread);
+      } catch (error) {
+        toast.error("Failed to create comment");
+        console.error("Create thread error:", error);
       }
     },
     [review.id, handleThreadCreated],

@@ -9,8 +9,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { reviewApi } from "@/lib/api-service";
 import { AlertCircle, Check, Download } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 interface ReviewActionsProps {
   reviewId: string;
@@ -36,21 +38,17 @@ export function ReviewActions({
 
     setIsSubmitting(true);
     try {
-      const response = await fetch(`/api/reviews/${reviewId}/submit`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          status: selectedAction,
-          message: message.trim() || undefined,
-        }),
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        onStatusChange(result.status, result.decisionMessage);
-        setSelectedAction(null);
-        setMessage("");
-      }
+      const result = await reviewApi.submitDecision(
+        reviewId,
+        selectedAction,
+        message.trim() || undefined,
+      );
+      onStatusChange(result.status, result.decisionMessage);
+      setSelectedAction(null);
+      setMessage("");
+    } catch (error) {
+      toast.error("Failed to submit review decision");
+      console.error("Submit decision error:", error);
     } finally {
       setIsSubmitting(false);
     }

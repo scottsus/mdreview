@@ -1,6 +1,7 @@
 "use client";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { reviewApi } from "@/lib/api-service";
 import {
   SIDEBAR_DEFAULT_WIDTH,
   SIDEBAR_MAX_WIDTH,
@@ -9,6 +10,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ThreadResponse } from "@/types";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { ThreadCard } from "./thread-card";
 
@@ -92,35 +94,31 @@ export function CommentSidebar({
               isActive={thread.id === activeThreadId}
               onClick={() => onThreadClick(thread.id)}
               onReply={async (body) => {
-                const response = await fetch(
-                  `/api/threads/${thread.id}/replies`,
-                  {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ body, authorType: "human" }),
-                  },
-                );
-                if (response.ok) {
-                  const comment = await response.json();
+                try {
+                  const comment = await reviewApi.addReply(thread.id, body);
                   onThreadUpdated({
                     id: thread.id,
                     comments: [...thread.comments, comment],
                   });
+                } catch (error) {
+                  toast.error("Failed to add reply");
+                  console.error("Add reply error:", error);
                 }
               }}
               onResolve={async () => {
-                const response = await fetch(`/api/threads/${thread.id}`, {
-                  method: "PATCH",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ resolved: !thread.resolved }),
-                });
-                if (response.ok) {
-                  const updated = await response.json();
+                try {
+                  const updated = await reviewApi.resolveThread(
+                    thread.id,
+                    !thread.resolved,
+                  );
                   onThreadUpdated({
                     id: thread.id,
                     resolved: updated.resolved,
                     resolvedAt: updated.resolvedAt,
                   });
+                } catch (error) {
+                  toast.error("Failed to update thread");
+                  console.error("Resolve thread error:", error);
                 }
               }}
             />
