@@ -1,6 +1,11 @@
 "use client";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  SIDEBAR_DEFAULT_WIDTH,
+  SIDEBAR_MAX_WIDTH,
+  SIDEBAR_MIN_WIDTH,
+} from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { ThreadResponse } from "@/types";
 import { useEffect, useState } from "react";
@@ -8,16 +13,11 @@ import { useEffect, useState } from "react";
 import { ThreadCard } from "./thread-card";
 
 interface CommentSidebarProps {
-  reviewId: string;
   threads: ThreadResponse[];
   activeThreadId: string | null;
   onThreadClick: (threadId: string) => void;
   onThreadUpdated: (thread: Partial<ThreadResponse> & { id: string }) => void;
 }
-
-const MIN_WIDTH = 320;
-const MAX_WIDTH = 800;
-const DEFAULT_WIDTH = 480;
 
 export function CommentSidebar({
   threads,
@@ -25,11 +25,14 @@ export function CommentSidebar({
   onThreadClick,
   onThreadUpdated,
 }: CommentSidebarProps) {
-  const [width, setWidth] = useState(DEFAULT_WIDTH);
+  const [width, setWidth] = useState(SIDEBAR_DEFAULT_WIDTH);
   const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
-    const targetWidth = Math.min(Math.max(window.innerWidth * 0.4, MIN_WIDTH), MAX_WIDTH);
+    const targetWidth = Math.min(
+      Math.max(window.innerWidth * 0.4, SIDEBAR_MIN_WIDTH),
+      SIDEBAR_MAX_WIDTH,
+    );
     setWidth(targetWidth);
   }, []);
 
@@ -42,7 +45,7 @@ export function CommentSidebar({
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDragging) return;
       const newWidth = window.innerWidth - e.clientX;
-      setWidth(Math.min(Math.max(newWidth, MIN_WIDTH), MAX_WIDTH));
+      setWidth(Math.min(Math.max(newWidth, SIDEBAR_MIN_WIDTH), SIDEBAR_MAX_WIDTH));
     };
 
     const handleMouseUp = () => setIsDragging(false);

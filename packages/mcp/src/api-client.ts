@@ -24,8 +24,8 @@ interface ReviewResponse {
 
 interface ThreadResponse {
   id: string;
-  startOffset: number;
-  endOffset: number;
+  startLine: number;
+  endLine: number;
   selectedText: string;
   resolved: boolean;
   comments: CommentResponse[];

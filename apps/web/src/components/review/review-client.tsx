@@ -118,7 +118,6 @@ export function ReviewClient({ initialReview }: ReviewClientProps) {
         </ScrollArea>
 
         <CommentSidebar
-          reviewId={review.id}
           threads={review.threads}
           activeThreadId={activeThreadId}
           onThreadClick={handleThreadClick}

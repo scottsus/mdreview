@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { ZodError } from "zod";
+import { ZodError, ZodIssue } from "zod";
 
 export function successResponse<T>(data: T, status = 200) {
   return NextResponse.json(data, { status });
@@ -9,7 +9,7 @@ export function errorResponse(
   error: string,
   message: string,
   status: number,
-  issues?: unknown[],
+  issues?: ZodIssue[],
 ) {
   return NextResponse.json({ error, message, issues }, { status });
 }

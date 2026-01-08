@@ -1,11 +1,10 @@
 import { db } from "@/db";
 import { reviews } from "@/db/schema";
 import { errorResponse, handleApiError, successResponse } from "@/lib/api";
+import { WAIT_DEFAULT_TIMEOUT, WAIT_POLL_INTERVAL } from "@/lib/constants";
+import { transformCommentToResponse } from "@/lib/transformers";
 import { eq } from "drizzle-orm";
 import { NextRequest } from "next/server";
-
-const DEFAULT_TIMEOUT = 300;
-const POLL_INTERVAL = 2000;
 
 export async function GET(
   request: NextRequest,
@@ -14,9 +13,10 @@ export async function GET(
   try {
     const { id } = await params;
     const { searchParams } = new URL(request.url);
+    const parsed = parseInt(searchParams.get("timeout") || "");
     const timeout = Math.min(
-      parseInt(searchParams.get("timeout") || String(DEFAULT_TIMEOUT)),
-      DEFAULT_TIMEOUT,
+      isNaN(parsed) || parsed <= 0 ? WAIT_DEFAULT_TIMEOUT : parsed,
+      WAIT_DEFAULT_TIMEOUT,
     );
 
     const startTime = Date.now();
@@ -61,13 +61,7 @@ export async function GET(
             endLine: thread.endLine,
             selectedText: thread.selectedText,
             resolved: thread.resolved,
-            comments: thread.comments.map((c) => ({
-              id: c.id,
-              body: c.body,
-              authorType: c.authorType,
-              authorName: c.authorName,
-              createdAt: c.createdAt.toISOString(),
-            })),
+            comments: thread.comments.map(transformCommentToResponse),
           })),
           summary: {
             totalThreads,
@@ -78,7 +72,7 @@ export async function GET(
         });
       }
 
-      await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL));
+      await new Promise((resolve) => setTimeout(resolve, WAIT_POLL_INTERVAL));
     }
 
     return successResponse(
