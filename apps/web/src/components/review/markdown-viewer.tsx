@@ -525,7 +525,7 @@ export function MarkdownViewer({
       onPointerMove={handleContainerPointerMove}
       onPointerUp={handleContainerPointerUp}
     >
-      <div className="prose prose-zinc dark:prose-invert max-w-none prose-headings:scroll-mt-20 pl-8 prose-p:my-2 prose-headings:my-3 prose-hr:my-2 prose-ul:my-2 prose-ol:my-2 prose-pre:my-2 prose-blockquote:my-2 prose-table:my-2">
+      <div className="prose prose-zinc dark:prose-invert max-w-none prose-headings:scroll-mt-20 pl-8 prose-p:my-2 prose-headings:my-3 prose-hr:my-2 prose-ul:my-2 prose-ol:my-2 prose-pre:my-2 prose-blockquote:my-2 prose-table:my-2 [&_code:not(pre_code)]:bg-zinc-100 [&_code:not(pre_code)]:dark:bg-zinc-800 [&_code:not(pre_code)]:px-1.5 [&_code:not(pre_code)]:py-0.5 [&_code:not(pre_code)]:rounded [&_code:not(pre_code)]:text-sm [&_code:not(pre_code)]:font-normal [&_code:not(pre_code)]:before:content-none [&_code:not(pre_code)]:after:content-none">
         <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
           {content}
         </ReactMarkdown>

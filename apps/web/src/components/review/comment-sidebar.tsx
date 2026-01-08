@@ -80,7 +80,7 @@ export function CommentSidebar({
         </p>
       </div>
 
-      <ScrollArea className="flex-1" scrollbarPosition="left">
+      <ScrollArea className="flex-1">
         <div className="p-4 pr-5 space-y-4 overflow-hidden">
           {threads.map((thread) => (
             <ThreadCard

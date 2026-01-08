@@ -3,6 +3,8 @@
 import { BlockSelection, ReviewResponse, ThreadResponse } from "@/types";
 import { useCallback, useState } from "react";
 
+import { ScrollArea } from "@/components/ui/scroll-area";
+
 import { CommentSidebar } from "./comment-sidebar";
 import { MarkdownViewer } from "./markdown-viewer";
 import { ReviewActions } from "./review-actions";
@@ -96,22 +98,24 @@ export function ReviewClient({ initialReview }: ReviewClientProps) {
   return (
     <div className="h-screen bg-background pb-20 overflow-hidden">
       <div className="flex h-[calc(100vh-5rem)]">
-        <div className="flex-1 min-w-0 overflow-auto p-8">
-          <div className="max-w-4xl mx-auto">
-            <ReviewHeader
-              title={review.title}
-              status={review.status}
-              decisionMessage={review.decisionMessage}
-            />
-            <MarkdownViewer
-              content={review.content}
-              threads={review.threads}
-              activeThreadId={activeThreadId}
-              onThreadClick={handleThreadClick}
-              onCreateThread={handleCreateThread}
-            />
+        <ScrollArea className="flex-1 min-w-0" scrollbarPosition="left" type="always">
+          <div className="p-8">
+            <div className="max-w-4xl mx-auto">
+              <ReviewHeader
+                title={review.title}
+                status={review.status}
+                decisionMessage={review.decisionMessage}
+              />
+              <MarkdownViewer
+                content={review.content}
+                threads={review.threads}
+                activeThreadId={activeThreadId}
+                onThreadClick={handleThreadClick}
+                onCreateThread={handleCreateThread}
+              />
+            </div>
           </div>
-        </div>
+        </ScrollArea>
 
         <CommentSidebar
           reviewId={review.id}
