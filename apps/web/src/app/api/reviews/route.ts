@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { reviews } from "@/db/schema";
 import { handleApiError, successResponse } from "@/lib/api";
+import { config } from "@/lib/config";
 import { generateSlug } from "@/lib/slug";
 import { createReviewSchema } from "@/types";
 import { NextRequest } from "next/server";
@@ -11,7 +12,6 @@ export async function POST(request: NextRequest) {
     const data = createReviewSchema.parse(body);
 
     const slug = generateSlug();
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
     const result = await db
       .insert(reviews)
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
       {
         id: review.id,
         slug: review.slug,
-        url: `${baseUrl}/review/${review.slug}`,
+        url: `${config.baseUrl}/review/${review.slug}`,
         status: review.status,
         createdAt: review.createdAt.toISOString(),
       },

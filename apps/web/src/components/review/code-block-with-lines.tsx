@@ -1,5 +1,6 @@
 "use client";
 
+import { getHighlightClasses } from "@/lib/highlight-styles";
 import { cn } from "@/lib/utils";
 import { Plus } from "lucide-react";
 import { Highlight, themes } from "prism-react-renderer";
@@ -168,6 +169,14 @@ function CodeLine({
 
   const showBlueHighlight = isInSelectionRange || isInFinalSelection;
 
+  const highlightClasses = getHighlightClasses({
+    showBlueHighlight,
+    isSelecting,
+    isHovered,
+    hasThread,
+    isActive,
+  });
+
   const { className: lineClassName, ...restLineProps } = lineProps;
 
   return (
@@ -176,15 +185,7 @@ function CodeLine({
       className={cn(
         lineClassName,
         "flex relative transition-colors select-none",
-        showBlueHighlight && "bg-blue-100 dark:bg-blue-900/40",
-        !isSelecting &&
-          !showBlueHighlight &&
-          isHovered &&
-          !hasThread &&
-          "bg-blue-50/50 dark:bg-blue-900/10",
-        !showBlueHighlight && hasThread && "bg-violet-50 dark:bg-violet-900/20",
-        !showBlueHighlight && isActive && "bg-violet-100 dark:bg-violet-900/40",
-        hasThread && "cursor-pointer"
+        ...highlightClasses,
       )}
       data-block-index={blockIndex}
       data-source-line={sourceLine}

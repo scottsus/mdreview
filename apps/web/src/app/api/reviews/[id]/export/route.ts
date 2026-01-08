@@ -35,6 +35,7 @@ export async function GET(
       return errorResponse("not_found", "Review not found", 404);
     }
 
+    // Export format is different from API response - simplified for external use
     const exportData = {
       review: {
         id: review.id,

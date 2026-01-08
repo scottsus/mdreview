@@ -1,5 +1,6 @@
 "use client";
 
+import { getHighlightClasses } from "@/lib/highlight-styles";
 import { cn } from "@/lib/utils";
 import { Plus } from "lucide-react";
 import React, { useState } from "react";
@@ -35,31 +36,21 @@ export function CommentableBlock({
 }: CommentableBlockProps) {
   const [isHovered, setIsHovered] = useState(false);
 
-  const lineLabel =
-    startLine === endLine ? `L${startLine}` : `L${startLine}-${endLine}`;
-
-  // Show blue highlight during drag OR when in final selection (form is open)
   const showBlueHighlight = isInSelectionRange || isInFinalSelection;
+
+  const highlightClasses = getHighlightClasses({
+    showBlueHighlight,
+    isSelecting,
+    isHovered,
+    hasThread,
+    isActive,
+  });
 
   return (
     <div
       className={cn(
         "relative transition-colors select-none",
-        // Selection/final selection highlight (blue)
-        showBlueHighlight && "bg-blue-100 dark:bg-blue-900/40",
-        // Normal hover (only when not selecting, no final selection, no thread)
-        !isSelecting &&
-          !showBlueHighlight &&
-          isHovered &&
-          !hasThread &&
-          "bg-blue-50/50 dark:bg-blue-900/10",
-        // Has thread - purple highlight (when not in selection)
-        !showBlueHighlight &&
-          hasThread &&
-          "bg-violet-50 dark:bg-violet-900/20",
-        // Active thread - darker purple (when not in selection)
-        !showBlueHighlight && isActive && "bg-violet-100 dark:bg-violet-900/40",
-        hasThread && "cursor-pointer"
+        ...highlightClasses,
       )}
       data-block-index={blockIndex}
       data-start-line={startLine}
