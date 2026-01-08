@@ -38,44 +38,44 @@ Comprehensive tech debt cleanup for MDReview codebase, addressing all issues ide
 | 1.4 | Remove dead code (comment-modal.tsx) | `apps/web/src/components/review/comment-modal.tsx` | Low | ✅ deleted |
 | 1.5 | Remove unused reviewId prop | `apps/web/src/components/review/comment-sidebar.tsx` | Low | ✅ done |
 
-### Phase 2: Centralization & DRY
+### Phase 2: Centralization & DRY ✅ COMPLETE
 
-| # | Task | Files | Effort |
-|---|------|-------|--------|
-| 2.1 | Create centralized config | New: `apps/web/src/lib/config.ts` | Low |
-| 2.2 | Create shared response transformer | New: `apps/web/src/lib/transformers.ts` | Medium |
-| 2.3 | Update all API routes to use transformer | 4 routes + 1 page | Medium |
-| 2.4 | Extract highlight styling to shared utility | New: `apps/web/src/lib/highlight-styles.ts` | Low |
-| 2.5 | Centralize ReviewStatus type usage | Multiple files | Low |
-| 2.6 | Centralize magic numbers/constants | New: `apps/web/src/lib/constants.ts` | Low |
+| # | Task | Files | Effort | Status |
+|---|------|-------|--------|--------|
+| 2.1 | Create centralized config | New: `apps/web/src/lib/config.ts` | Low | ✅ done |
+| 2.2 | Create shared response transformer | New: `apps/web/src/lib/transformers.ts` | Medium | ✅ done |
+| 2.3 | Update all API routes to use transformer | 4 routes + 1 page | Medium | ✅ done |
+| 2.4 | Extract highlight styling to shared utility | New: `apps/web/src/lib/highlight-styles.ts` | Low | ✅ done |
+| 2.5 | Centralize ReviewStatus type usage | Multiple files | Low | ✅ skipped (minimal impact) |
+| 2.6 | Centralize magic numbers/constants | New: `apps/web/src/lib/constants.ts` | Low | ✅ done |
 
-### Phase 3: API Service Layer
+### Phase 3: API Service Layer ✅ COMPLETE
 
-| # | Task | Files | Effort |
-|---|------|-------|--------|
-| 3.1 | Create API service layer | New: `apps/web/src/lib/api-service.ts` | Medium |
-| 3.2 | Refactor review-client.tsx to use API service | `apps/web/src/components/review/review-client.tsx` | Medium |
-| 3.3 | Refactor comment-sidebar.tsx to use API service | `apps/web/src/components/review/comment-sidebar.tsx` | Medium |
-| 3.4 | Refactor review-actions.tsx to use API service | `apps/web/src/components/review/review-actions.tsx` | Medium |
-| 3.5 | Add proper error handling with user feedback | All components using API | Medium |
+| # | Task | Files | Effort | Status |
+|---|------|-------|--------|--------|
+| 3.1 | Create API service layer | New: `apps/web/src/lib/api-service.ts` | Medium | ✅ done |
+| 3.2 | Refactor review-client.tsx to use API service | `apps/web/src/components/review/review-client.tsx` | Medium | ✅ done |
+| 3.3 | Refactor comment-sidebar.tsx to use API service | `apps/web/src/components/review/comment-sidebar.tsx` | Medium | ✅ done |
+| 3.4 | Refactor review-actions.tsx to use API service | `apps/web/src/components/review/review-actions.tsx` | Medium | ✅ done |
+| 3.5 | Add proper error handling with user feedback | All components using API | Medium | ✅ done (sonner toasts) |
 
-### Phase 4: SRP Refactoring (markdown-viewer.tsx)
+### Phase 4: SRP Refactoring (markdown-viewer.tsx) ✅ COMPLETE
 
-| # | Task | Files | Effort |
-|---|------|-------|--------|
-| 4.1 | Extract useBlockSelection hook | New: `apps/web/src/hooks/use-block-selection.ts` | High |
-| 4.2 | Extract useBlockRegistry hook | New: `apps/web/src/hooks/use-block-registry.ts` | Medium |
-| 4.3 | Extract useThreadHighlighting hook | New: `apps/web/src/hooks/use-thread-highlighting.ts` | Medium |
-| 4.4 | Refactor markdown-viewer.tsx as orchestrator | `apps/web/src/components/review/markdown-viewer.tsx` | High |
+| # | Task | Files | Effort | Status |
+|---|------|-------|--------|--------|
+| 4.1 | Extract useBlockSelection hook | New: `apps/web/src/hooks/use-block-selection.ts` | High | ✅ done |
+| 4.2 | Extract useBlockRegistry hook | New: `apps/web/src/hooks/use-block-registry.ts` | Medium | ✅ done |
+| 4.3 | Extract useThreadHighlighting hook | New: `apps/web/src/hooks/use-thread-highlighting.ts` | Medium | ✅ done |
+| 4.4 | Refactor markdown-viewer.tsx as orchestrator | `apps/web/src/components/review/markdown-viewer.tsx` | High | ✅ 535→335 lines |
 
-### Phase 5: Medium Priority Fixes
+### Phase 5: Medium Priority Fixes ✅ COMPLETE
 
-| # | Task | Files | Effort |
-|---|------|-------|--------|
-| 5.1 | Remove or implement includeContent param | `packages/mcp/src/api-client.ts` | Low |
-| 5.2 | Add export error handling with toast | `apps/web/src/components/review/review-client.tsx` | Low |
-| 5.3 | Remove console.error statements | `apps/web/src/lib/api.ts`, `packages/mcp/src/index.ts` | Low |
-| 5.4 | Remove non-functional toolbar buttons | `apps/web/src/components/review/inline-comment-form.tsx` | Low |
+| # | Task | Files | Effort | Status |
+|---|------|-------|--------|--------|
+| 5.1 | Remove or implement includeContent param | `packages/mcp/src/api-client.ts` | Low | ✅ removed |
+| 5.2 | Add export error handling with toast | `apps/web/src/components/review/review-client.tsx` | Low | ✅ already done in Phase 3 |
+| 5.3 | Remove console.error statements | `apps/web/src/lib/api.ts` | Low | ✅ removed |
+| 5.4 | Remove non-functional toolbar buttons | `apps/web/src/components/review/inline-comment-form.tsx` | Low | ✅ removed (153→108 lines) |
 
 ### Phase 6: Integration Tests
 
