@@ -26,6 +26,13 @@
     "db:studio": {
       "cache": false,
       "persistent": true
+    },
+    "test": {
+      "cache": false
+    },
+    "test:integration": {
+      "dependsOn": [],
+      "cache": false
     }
   }
 }

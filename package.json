@@ -8,7 +8,8 @@
     "typecheck": "turbo run typecheck",
     "db:generate": "turbo run db:generate --filter=@mdreview/web",
     "db:push": "turbo run db:push --filter=@mdreview/web",
-    "db:studio": "turbo run db:studio --filter=@mdreview/web"
+    "db:studio": "turbo run db:studio --filter=@mdreview/web",
+    "test:integration": "pnpm --filter @mdreview/integration-tests test"
   },
   "devDependencies": {
     "turbo": "^2.3.0",
