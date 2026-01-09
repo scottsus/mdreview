@@ -6,7 +6,6 @@ Self-healing systems with long-term memory. Learned knowledge from past work.
 
 ```
 experience/
-├── Mnemosyne.md           # Ignore unless you're the Reflect agent
 ├── runbooks/              # How-to guides for recurring tasks
 ├── troubleshooting/       # Problem → solution mappings
 ├── lessons/               # Insights and best practices

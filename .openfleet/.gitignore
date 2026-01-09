@@ -1,5 +1,7 @@
-# Transcripts may contain sensitive data (API keys, secrets)
+# .openfleet
+agents/
+stories/
+status.md
+sessions/
 transcripts/
-
-# Log file
 openfleet.log
