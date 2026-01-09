@@ -5,7 +5,7 @@ import { useBlockSelection } from "@/hooks/use-block-selection";
 import { useThreadHighlighting } from "@/hooks/use-thread-highlighting";
 import { cn } from "@/lib/utils";
 import { BlockSelection, ThreadResponse } from "@/types";
-import React, { useCallback, useMemo, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown, { Components, ExtraProps } from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -60,6 +60,34 @@ export function MarkdownViewer({
   } = useBlockSelection({ containerRef, getBlockByIndex });
   const { getThreadsForRange, getThreadsForLine } = useThreadHighlighting({ threads });
 
+  const [pendingClear, setPendingClear] = useState<{
+    startLine: number;
+    endLine: number;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!pendingClear) return;
+
+    const threadExists = threads.some(
+      (t) =>
+        t.startLine === pendingClear.startLine &&
+        t.endLine === pendingClear.endLine
+    );
+
+    if (threadExists) {
+      setFinalSelection(null);
+      setPendingClear(null);
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      setFinalSelection(null);
+      setPendingClear(null);
+    }, 5000);
+
+    return () => clearTimeout(timeoutId);
+  }, [threads, pendingClear, setFinalSelection]);
+
   // Reset block registry on each render (deterministic based on content)
   resetRegistry();
 
@@ -86,18 +114,20 @@ export function MarkdownViewer({
     async (body: string) => {
       if (!selectionState.finalSelection) return;
 
+      const { startLine, endLine } = selectionState.finalSelection;
+
       await onCreateThread(
         {
-          startLine: selectionState.finalSelection.startLine,
-          endLine: selectionState.finalSelection.endLine,
+          startLine,
+          endLine,
           blockContent: selectionState.finalSelection.blockContent,
         },
         body
       );
 
-      setFinalSelection(null);
+      setPendingClear({ startLine, endLine });
     },
-    [selectionState.finalSelection, onCreateThread, setFinalSelection]
+    [selectionState.finalSelection, onCreateThread]
   );
 
   const handleCommentCancel = useCallback(() => {
@@ -115,6 +145,16 @@ export function MarkdownViewer({
       });
     },
     [setFinalSelection]
+  );
+
+  const handleBlockPointerDownWithClear = useCallback(
+    (blockIndex: number, e: React.PointerEvent) => {
+      if (pendingClear) {
+        setPendingClear(null);
+      }
+      handleBlockPointerDown(blockIndex, e);
+    },
+    [pendingClear, handleBlockPointerDown]
   );
 
   const createBlockComponent = useCallback(
@@ -164,7 +204,7 @@ export function MarkdownViewer({
               isInSelectionRange={isInSelectionRange}
               isSelecting={selectionState.isSelecting}
               isInFinalSelection={isInFinalSelection}
-              onPointerDown={(e) => handleBlockPointerDown(blockIndex, e)}
+              onPointerDown={(e) => handleBlockPointerDownWithClear(blockIndex, e)}
               onAddComment={() => handleAddComment(blockIndex, startLine, endLine, blockContent)}
               onClick={() => {
                 if (threadIds[0]) {
@@ -195,7 +235,7 @@ export function MarkdownViewer({
       activeThreadId,
       getTextContent,
       getThreadsForRange,
-      handleBlockPointerDown,
+      handleBlockPointerDownWithClear,
       handleCommentSubmit,
       handleCommentCancel,
       handleAddComment,
@@ -231,7 +271,7 @@ export function MarkdownViewer({
             isInSelectionRange={false}
             isSelecting={selectionState.isSelecting}
             isInFinalSelection={false}
-            onPointerDown={(e) => handleBlockPointerDown(blockIndex, e)}
+            onPointerDown={(e) => handleBlockPointerDownWithClear(blockIndex, e)}
             onAddComment={() => {}}
             onClick={() => {}}
           >
@@ -262,7 +302,7 @@ export function MarkdownViewer({
           finalSelection={selectionState.finalSelection}
           getThreadsForLine={getThreadsForLine}
           activeThreadId={activeThreadId}
-          onPointerDown={handleBlockPointerDown}
+          onPointerDown={handleBlockPointerDownWithClear}
           onAddComment={handleAddComment}
           onThreadClick={onThreadClick}
           renderInlineForm={(show) =>
@@ -284,7 +324,7 @@ export function MarkdownViewer({
     [
       activeThreadId,
       getThreadsForLine,
-      handleBlockPointerDown,
+      handleBlockPointerDownWithClear,
       handleCommentSubmit,
       handleCommentCancel,
       handleAddComment,
@@ -325,7 +365,7 @@ export function MarkdownViewer({
       onPointerMove={handleContainerPointerMove}
       onPointerUp={handleContainerPointerUp}
     >
-      <div className="prose prose-zinc dark:prose-invert max-w-none prose-headings:scroll-mt-20 pl-8 prose-p:my-2 prose-headings:my-3 prose-hr:my-2 prose-ul:my-2 prose-ol:my-2 prose-pre:my-2 prose-blockquote:my-2 prose-table:my-2 [&_code:not(pre_code)]:bg-zinc-100 [&_code:not(pre_code)]:dark:bg-zinc-800 [&_code:not(pre_code)]:px-1.5 [&_code:not(pre_code)]:py-0.5 [&_code:not(pre_code)]:rounded [&_code:not(pre_code)]:text-sm [&_code:not(pre_code)]:font-normal [&_code:not(pre_code)]:before:content-none [&_code:not(pre_code)]:after:content-none">
+      <div className="prose prose-zinc dark:prose-invert max-w-none prose-headings:scroll-mt-20 pl-8 prose-p:my-2 prose-headings:my-3 prose-hr:my-2 prose-ul:my-2 prose-ol:my-2 prose-pre:my-2 prose-blockquote:my-2 prose-table:my-2 [&_code:not(pre_code)]:bg-zinc-200 [&_code:not(pre_code)]:dark:bg-zinc-700 [&_code:not(pre_code)]:text-blue-700 [&_code:not(pre_code)]:dark:text-blue-300 [&_code:not(pre_code)]:px-1.5 [&_code:not(pre_code)]:py-0.5 [&_code:not(pre_code)]:!rounded-[3px] [&_code:not(pre_code)]:text-sm [&_code:not(pre_code)]:font-normal [&_code:not(pre_code)]:before:content-none [&_code:not(pre_code)]:after:content-none">
         <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
           {content}
         </ReactMarkdown>
