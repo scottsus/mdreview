@@ -40,8 +40,9 @@ export function ThreadCard({
 
   return (
     <div
+      data-thread-id={thread.id}
       className={cn(
-        "border rounded-lg overflow-hidden cursor-pointer transition-colors",
+        "border rounded-lg overflow-hidden cursor-pointer transition-colors scroll-mt-4",
         isActive && "ring-2 ring-primary",
         thread.resolved && "opacity-60",
       )}

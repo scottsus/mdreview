@@ -175,6 +175,7 @@ function CodeLine({
     isHovered,
     hasThread,
     isActive,
+    activeThreadHighlightVariant: "yellow",
   });
 
   const { className: lineClassName, ...restLineProps } = lineProps;

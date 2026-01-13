@@ -9,7 +9,7 @@ import {
 } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { ThreadResponse } from "@/types";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { ThreadCard } from "./thread-card";
@@ -29,6 +29,7 @@ export function CommentSidebar({
 }: CommentSidebarProps) {
   const [width, setWidth] = useState(SIDEBAR_DEFAULT_WIDTH);
   const [isDragging, setIsDragging] = useState(false);
+  const scrollAreaRootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const targetWidth = Math.min(
@@ -37,6 +38,39 @@ export function CommentSidebar({
     );
     setWidth(targetWidth);
   }, []);
+
+  const scrollThreadCardToTop = (threadId: string) => {
+    const root = scrollAreaRootRef.current;
+    if (!root) return;
+
+    const viewport = root.querySelector(
+      "[data-radix-scroll-area-viewport]",
+    ) as HTMLElement | null;
+
+    const card = root.querySelector(
+      `[data-thread-id="${CSS.escape(threadId)}"]`,
+    ) as HTMLElement | null;
+
+    if (!viewport || !card) return;
+
+    const viewportRect = viewport.getBoundingClientRect();
+    const cardRect = card.getBoundingClientRect();
+
+    const nearTopThresholdPx = 24;
+    const isAlreadyNearTop =
+      cardRect.top >= viewportRect.top &&
+      cardRect.top <= viewportRect.top + nearTopThresholdPx;
+
+    if (isAlreadyNearTop) return;
+
+    card.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const handleSidebarThreadClick = (threadId: string) => {
+    onThreadClick(threadId);
+
+    requestAnimationFrame(() => scrollThreadCardToTop(threadId));
+  };
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
@@ -85,14 +119,14 @@ export function CommentSidebar({
         </p>
       </div>
 
-      <ScrollArea className="flex-1">
+      <ScrollArea ref={scrollAreaRootRef} className="flex-1">
         <div className="p-4 pr-5 space-y-4 overflow-hidden">
           {threads.map((thread) => (
             <ThreadCard
               key={thread.id}
               thread={thread}
               isActive={thread.id === activeThreadId}
-              onClick={() => onThreadClick(thread.id)}
+              onClick={() => handleSidebarThreadClick(thread.id)}
               onReply={async (body) => {
                 try {
                   const comment = await reviewApi.addReply(thread.id, body);
