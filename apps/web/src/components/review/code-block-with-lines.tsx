@@ -184,7 +184,7 @@ function CodeLine({
       {...restLineProps}
       className={cn(
         lineClassName,
-        "flex relative transition-colors select-none",
+        "flex relative transition-colors select-none scroll-mt-24",
         ...highlightClasses,
       )}
       data-block-index={blockIndex}

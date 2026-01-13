@@ -49,7 +49,7 @@ export function CommentableBlock({
   return (
     <div
       className={cn(
-        "relative transition-colors select-none",
+        "relative transition-colors select-none scroll-mt-24",
         ...highlightClasses,
       )}
       data-block-index={blockIndex}

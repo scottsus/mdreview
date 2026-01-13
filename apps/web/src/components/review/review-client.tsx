@@ -21,7 +21,20 @@ export function ReviewClient({ initialReview }: ReviewClientProps) {
 
   const handleThreadClick = useCallback((threadId: string) => {
     setActiveThreadId(threadId);
-  }, []);
+
+    // Find the thread to get its startLine
+    const thread = review.threads.find((t) => t.id === threadId);
+    if (!thread) return;
+
+    // Find block by line number (works for both block-level and code-line comments)
+    const blockEl = document.querySelector(
+      `[data-start-line="${thread.startLine}"], [data-source-line="${thread.startLine}"]`
+    );
+
+    if (blockEl) {
+      blockEl.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [review.threads]);
 
   const handleThreadCreated = useCallback((thread: ThreadResponse) => {
     setReview((prev) => ({
