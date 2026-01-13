@@ -53,14 +53,6 @@ export async function POST(
         throw new Error("Failed to create comment");
       }
 
-      // Reset review status to pending when agent adds a comment
-      if (data.authorType === "agent" && review.status !== "pending") {
-        await tx
-          .update(reviews)
-          .set({ status: "pending", decisionMessage: null, decidedAt: null })
-          .where(eq(reviews.id, reviewId));
-      }
-
       return { thread, comment };
     });
 

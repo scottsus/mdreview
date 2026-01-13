@@ -39,13 +39,6 @@ interface CommentResponse {
   createdAt: string;
 }
 
-interface SubmitDecisionResponse {
-  id: string;
-  status: string;
-  decisionMessage: string | null;
-  decidedAt: string | null;
-}
-
 interface ResolveThreadResponse {
   id: string;
   resolved: boolean;
@@ -105,28 +98,6 @@ export class ApiClient {
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.message || "Failed to add comment");
-    }
-
-    return response.json();
-  }
-
-  async submitDecision(
-    reviewId: string,
-    decision: "approved" | "rejected" | "changes_requested",
-    message?: string,
-  ): Promise<SubmitDecisionResponse> {
-    const response = await fetch(
-      `${this.baseUrl}/api/reviews/${reviewId}/submit`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ decision, message }),
-      },
-    );
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || "Failed to submit decision");
     }
 
     return response.json();

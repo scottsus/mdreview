@@ -7,11 +7,6 @@ export const createReviewSchema = z.object({
   agentId: z.string().max(100).optional(),
 });
 
-export const submitReviewSchema = z.object({
-  status: z.enum(["approved", "changes_requested", "rejected"]),
-  message: z.string().optional(),
-});
-
 export const createThreadSchema = z.object({
   startLine: z.number().int().min(1),
   endLine: z.number().int().min(1),

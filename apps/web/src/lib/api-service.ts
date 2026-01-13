@@ -11,11 +11,6 @@ export interface CreateThreadData {
   authorName?: string;
 }
 
-export interface SubmitDecisionResult {
-  status: string;
-  decisionMessage: string | null;
-}
-
 export interface ResolveThreadResult {
   resolved: boolean;
   resolvedAt: string | null;
@@ -79,19 +74,6 @@ export const reviewApi = {
       body: JSON.stringify({ resolved }),
     });
     return handleResponse<ResolveThreadResult>(response);
-  },
-
-  submitDecision: async (
-    reviewId: string,
-    status: string,
-    message?: string,
-  ): Promise<SubmitDecisionResult> => {
-    const response = await fetch(`/api/reviews/${reviewId}/submit`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status, message }),
-    });
-    return handleResponse<SubmitDecisionResult>(response);
   },
 
   exportReview: async (

@@ -43,17 +43,6 @@ export function ReviewClient({ initialReview }: ReviewClientProps) {
     [],
   );
 
-  const handleStatusChange = useCallback(
-    (status: string, decisionMessage: string | null) => {
-      setReview((prev) => ({
-        ...prev,
-        status,
-        decisionMessage,
-      }));
-    },
-    [],
-  );
-
   const handleExport = useCallback(
     async (format: "yaml" | "json") => {
       try {
@@ -99,11 +88,7 @@ export function ReviewClient({ initialReview }: ReviewClientProps) {
         <ScrollArea className="flex-1 min-w-0" scrollbarPosition="left" type="always">
           <div className="p-8">
             <div className="max-w-4xl mx-auto">
-              <ReviewHeader
-                title={review.title}
-                status={review.status}
-                decisionMessage={review.decisionMessage}
-              />
+              <ReviewHeader title={review.title} />
               <MarkdownViewer
                 content={review.content}
                 threads={review.threads}
@@ -123,12 +108,7 @@ export function ReviewClient({ initialReview }: ReviewClientProps) {
         />
       </div>
 
-      <ReviewActions
-        reviewId={review.id}
-        status={review.status}
-        onStatusChange={handleStatusChange}
-        onExport={handleExport}
-      />
+      <ReviewActions onExport={handleExport} />
     </div>
   );
 }

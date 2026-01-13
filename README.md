@@ -15,8 +15,7 @@ MDReview allows you to upload markdown content, share a unique review URL, and c
 - **Line-level Code Review**: Comment on specific lines within fenced code blocks.
 - **Multi-selection**: Click and drag to select multiple blocks or lines for a single comment thread.
 - **Threaded Discussions**: Reply to comments to discuss feedback in context.
-- **Review Workflow**: Formal Approve, Reject, or Request Changes decisions.
-- **Data Export**: Export completed reviews to YAML or JSON for integration with other tools.
+- **Data Export**: Export reviews to YAML or JSON for integration with other tools.
 - **AI-Ready**: Built-in MCP server for seamless integration with AI agents like Claude or Cursor.
 
 ## Tech Stack
@@ -82,9 +81,9 @@ MDReview includes a Model Context Protocol (MCP) server, allowing AI agents to i
 ### Tools
 
 - `request_review`: Create a new markdown review and get a shareable URL.
-- `wait_for_review`: Block until a reviewer makes a decision (approved/rejected/changes requested).
 - `get_review_status`: Check the current status and comment count of a review.
 - `add_comment`: Add a reply to an existing comment thread.
+- `resolve_thread`: Mark a comment thread as resolved.
 
 ### Usage with Claude Desktop
 

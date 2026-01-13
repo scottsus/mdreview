@@ -20,7 +20,7 @@ server.registerTool(
   {
     title: "Request Review",
     description:
-      "Create a markdown document review and get a shareable URL. Share this URL with the reviewer and they can add inline comments and approve/reject the document.",
+      "Create a markdown document review and get a shareable URL. Share this URL with the reviewer and they can add inline comments.",
     inputSchema: {
       filePath: z.string().describe("The path to the markdown file to review"),
     },
@@ -49,7 +49,7 @@ server.registerTool(
       content: [
         {
           type: "text" as const,
-          text: `Review created successfully!\n\nReview URL: ${result.url}\n\nShare this URL with your reviewer. They can:\n- Add inline comments by selecting text\n- Approve, reject, or request changes\n\nUse 'get_review_status' with reviewId "${result.id}" to check the review status.`,
+          text: `Review created successfully!\n\nReview URL: ${result.url}\n\nShare this URL with your reviewer. They can add inline comments by selecting text.\n\nUse 'get_review_status' with reviewId "${result.id}" to check comments.`,
         },
       ],
       structuredContent: {
@@ -98,7 +98,7 @@ server.registerTool(
       content: [
         {
           type: "text" as const,
-          text: `Review Status: ${result.status.toUpperCase()}\nTitle: ${result.title || "(untitled)"}\nMessage: ${result.decisionMessage || "(none)"}\nURL: ${result.url}\n\nSummary:\n- Total threads: ${summary.totalThreads}\n- Resolved: ${summary.resolvedThreads}\n- Unresolved: ${summary.unresolvedThreads}\n- Total comments: ${summary.totalComments}\n\n${commentsText ? `Comments:\n${commentsText}` : "No comments."}`,
+          text: `Review: ${result.title || "(untitled)"}\nURL: ${result.url}\n\nSummary:\n- Total threads: ${summary.totalThreads}\n- Resolved: ${summary.resolvedThreads}\n- Unresolved: ${summary.unresolvedThreads}\n- Total comments: ${summary.totalComments}\n\n${commentsText ? `Comments:\n${commentsText}` : "No comments."}`,
         },
       ],
       structuredContent: {
@@ -168,44 +168,6 @@ server.registerTool(
         threadId: result.id,
         resolved: result.resolved,
         resolvedAt: result.resolvedAt,
-      } as Record<string, unknown>,
-    };
-  },
-);
-
-// Tool: submit_decision
-server.registerTool(
-  "submit_decision",
-  {
-    title: "Submit Decision",
-    description:
-      "Submit a review decision (approve, reject, or request changes). Use this to finalize a review.",
-    inputSchema: {
-      reviewId: z.string().describe("The review ID"),
-      decision: z
-        .enum(["approved", "rejected", "changes_requested"])
-        .describe("The decision"),
-      message: z
-        .string()
-        .optional()
-        .describe("Optional message explaining the decision"),
-    },
-  },
-  async ({ reviewId, decision, message }) => {
-    const result = await apiClient.submitDecision(reviewId, decision, message);
-
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: `Decision submitted successfully!\n\nReview ID: ${result.id}\nDecision: ${result.status.toUpperCase()}\nMessage: ${result.decisionMessage || "(none)"}`,
-        },
-      ],
-      structuredContent: {
-        reviewId: result.id,
-        status: result.status,
-        decisionMessage: result.decisionMessage,
-        decidedAt: result.decidedAt,
       } as Record<string, unknown>,
     };
   },

@@ -9,7 +9,6 @@ describe("Export API", () => {
   let reviewSlug: string;
 
   beforeAll(async () => {
-    // Create a review with threads for export testing
     const review = await createTestReview(
       "# Export Test\n\nContent to export",
       "Export Test Review",
@@ -17,23 +16,12 @@ describe("Export API", () => {
     reviewId = review.id;
     reviewSlug = review.slug;
 
-    // Add a thread with comments
     await createTestThread(reviewId, {
       startLine: 1,
       endLine: 1,
       selectedText: "# Export Test",
       body: "This is a comment",
       authorName: "Reviewer",
-    });
-
-    // Submit a decision
-    await fetch(`${config.apiBaseUrl}/api/reviews/${reviewId}/submit`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        status: "approved",
-        message: "Approved for export",
-      }),
     });
   });
 
@@ -57,7 +45,7 @@ describe("Export API", () => {
       expect(yaml).toContain("review:");
       expect(yaml).toContain("id:");
       expect(yaml).toContain("title: Export Test Review");
-      expect(yaml).toContain("status: approved");
+      expect(yaml).toContain("status: pending");
       expect(yaml).toContain("threads:");
     });
 
@@ -68,9 +56,6 @@ describe("Export API", () => {
 
       expect(response.status).toBe(200);
       expect(response.headers.get("Content-Type")).toBe("text/yaml");
-
-      const yaml = await response.text();
-      expect(yaml).toContain("decisionMessage: Approved for export");
     });
 
     it("should export as JSON when format=json", async () => {
@@ -87,8 +72,8 @@ describe("Export API", () => {
       expect(data.review).toBeDefined();
       expect(data.review.id).toBe(reviewId);
       expect(data.review.title).toBe("Export Test Review");
-      expect(data.review.status).toBe("approved");
-      expect(data.review.decisionMessage).toBe("Approved for export");
+      expect(data.review.status).toBe("pending");
+      expect(data.review.decisionMessage).toBeNull();
       expect(data.threads).toBeDefined();
       expect(data.threads.length).toBeGreaterThan(0);
     });

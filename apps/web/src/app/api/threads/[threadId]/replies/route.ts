@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { comments, reviews, threads } from "@/db/schema";
+import { comments, threads } from "@/db/schema";
 import { errorResponse, handleApiError, successResponse } from "@/lib/api";
 import { createReplySchema } from "@/types";
 import { eq } from "drizzle-orm";
@@ -16,7 +16,6 @@ export async function POST(
 
     const thread = await db.query.threads.findFirst({
       where: eq(threads.id, threadId),
-      with: { review: true },
     });
 
     if (!thread) {
@@ -36,14 +35,6 @@ export async function POST(
     const comment = result[0];
     if (!comment) {
       throw new Error("Failed to create comment");
-    }
-
-    // Reset review status to pending when agent adds a comment
-    if (data.authorType === "agent" && thread.review.status !== "pending") {
-      await db
-        .update(reviews)
-        .set({ status: "pending", decisionMessage: null, decidedAt: null })
-        .where(eq(reviews.id, thread.reviewId));
     }
 
     return successResponse(
