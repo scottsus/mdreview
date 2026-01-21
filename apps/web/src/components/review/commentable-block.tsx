@@ -44,6 +44,7 @@ export function CommentableBlock({
     isHovered,
     hasThread,
     isActive,
+    activeThreadHighlightVariant: "yellow",
   });
 
   return (
