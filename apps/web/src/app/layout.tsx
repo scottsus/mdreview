@@ -28,11 +28,11 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <Toaster richColors position="bottom-right" />
+          <div className="fixed top-4 right-4 z-50">
+            <ThemeToggle />
+          </div>
         </ThemeProvider>
-        <Toaster richColors position="bottom-right" />
-        <div className="fixed top-4 right-4 z-50">
-          <ThemeToggle />
-        </div>
       </body>
     </html>
   );

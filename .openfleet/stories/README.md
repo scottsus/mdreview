@@ -1,197 +1,127 @@
-# Stories Directory
+# Stories
 
-Working tree for active stories. **This directory is gitignored.**
+Work organized by story/epic. Each story follows the git worktree pattern and SPARR framework.
 
-## Structure
+## Active Stories
 
-```
-stories/
-├── README.md                      # This file
-└── <story-name>/
-    ├── README.md                  # Story overview, goals
-    ├── Research.md                # Scout's findings
-    ├── HLD.md                     # High-level design
-    ├── LLD.md                     # Low-level design
-    ├── Implementation.md          # Actor's report
-    └── tasks/
-        └── <MM-DD_task-name>/
-            ├── README.md          # Task overview
-            ├── Research.md
-            ├── HLD.md
-            ├── LLD.md
-            ├── Implementation.md
-            └── branches/          # For discovered issues
-                └── <branch-name>/
-                    ├── README.md
-                    ├── Research.md
-                    ├── HLD.md
-                    ├── LLD.md
-                    ├── Implementation.md
-                    └── branches/  # Recursive (unlimited depth)
-```
+_None currently active_
 
-## Naming Conventions
+## Completed Stories (2026-01-21)
 
-- **Story directories**: lowercase kebab-case (`auth-redesign`, `openfleet-v2`)
-- **Task directories**: `MM-DD_<task-name>` (month-day, e.g. `01-05_jwt-validation` for Jan 5)
-- **Branch directories**: lowercase kebab-case (`fix-expiry`, `add-caching`)
+### 1. dark-mode-toggle ✅
+**Branch**: `feat/dark-mode-toggle` (merged to main)  
+**Commit**: `a2402a1`  
+**Date**: 2026-01-21
 
-## Git Alignment
+Implemented light/dark mode toggle using next-themes:
+- Theme toggle button in top-right corner
+- Animated sun/moon icons
+- localStorage persistence + system preference detection
+- FOUC prevention and hydration safety
 
-File system paths map to git branches:
+**Files**: +79 lines, 5 files changed  
+**Components**: theme-provider.tsx, theme-toggle.tsx
 
-| Path                                                        | Git Branch                                                     |
-| ----------------------------------------------------------- | -------------------------------------------------------------- |
-| `stories/agent-harness-hardening/`                          | `feat/agent-harness-hardening`                                 |
-| `stories/agent-harness-hardening/tasks/01-05_plugin-hooks/` | `feat/agent-harness-hardening/plugin-hooks`                    |
-| `stories/.../branches/fix-opencode-hooks/`                  | `feat/agent-harness-hardening/plugin-hooks/fix-opencode-hooks` |
+---
 
-## Branch Complexity Tiers
+### 2. yellow-highlight-consistency ✅
+**Branch**: `feat/yellow-highlight-consistency` (merged to main)  
+**Commit**: `abf3138`  
+**Date**: 2026-01-21
 
-When Zeus discovers an issue mid-task:
+Fixed active thread highlighting inconsistency:
+- All blocks now show yellow highlight for active threads
+- Previously headers/lists showed purple (incorrect)
+- One-line parameter addition
 
-| Tier    | Criteria              | Action                         |
-| ------- | --------------------- | ------------------------------ |
-| Trivial | <10 lines, obvious    | Actor fixes inline             |
-| Medium  | Needs investigation   | Create `branches/`, mini-SPARR |
-| Hard    | Cross-cutting concern | Escalate to sibling story      |
+**Files**: +1 line, 1 file changed
 
-## Story Lifecycle
+---
 
-1. Zeus creates story directory + git branch
-2. SPARR cycle: Scout → Planner → Actor → Reviewer → Reflector
-3. If issue discovered: assess tier, branch if needed
-4. On completion: Zeus compresses to `docs/<story>.md`
-5. Working files can be deleted (gitignored anyway)
+### 3. resolved-thread-collapse ✅
+**Branch**: `feat/resolved-thread-collapse` (merged via PR #1)  
+**Commit**: `4d45fe8`  
+**Date**: 2026-01-14
 
-## Story README Format
+Collapsed resolved threads in sidebar:
+- Resolved threads collapse to header-only when not selected
+- Unresolved threads remain expanded
+- Active resolved thread stays expanded
+- Smooth collapse/expand animation using Radix Collapsible
 
-```markdown
-# <Story Name>
+**PR**: https://github.com/scottsus/mdreview/pull/1
 
-**Created**: YYYY-MM-DD
-**Status**: planning | in_progress | completed
-**Branch**: feat/<story-name>
+---
 
-## Goal
+### 4. thread-click-scroll ✅
+**Commits**: `500f080`, `4edff05`  
+**Date**: 2026-01-13
 
-<What this story aims to accomplish>
+Improved thread navigation UX:
+- Scroll sidebar to active thread automatically
+- Scroll to block when clicking thread in sidebar
+- Highlight active code lines in yellow
 
-## Tasks
+---
 
-- [ ] <Task 1>
-- [x] <Task 2> ← completed
+### 5. simplify-review-ux ✅
+**Commit**: `09c9c3f`  
+**Date**: 2026-01-13
 
-## Git Tree
+Simplified review workflow:
+- Removed approval workflow complexity
+- Focused on comments-only model
+- Cleaner, more intuitive UX
 
-<Current branch topology - maintained by Zeus>
-```
+---
 
-## Example: Complete Story with Branches
-
-This example demonstrates a real story with nested branches, escalation, and resolution.
-
-### File System Structure
+## Git Worktree Pattern
 
 ```
-stories/
-└── agent-harness-hardening/
-    ├── README.md
-    ├── Research.md
-    ├── HLD.md
-    ├── LLD.md
-    └── tasks/
-        ├── 01-05_plugin-hooks/
-        │   ├── README.md
-        │   ├── Research.md
-        │   ├── HLD.md
-        │   ├── LLD.md
-        │   └── branches/
-        │       └── fix-opencode-hooks/
-        │           ├── README.md
-        │           ├── Research.md      ← mini-SPARR
-        │           ├── HLD.md
-        │           ├── LLD.md
-        │           └── branches/
-        │               └── add-hook-regression-tests/    ← nested branch (2 levels deep)
-        │                   ├── README.md
-        │                   ├── Research.md
-        │                   └── LLD.md
-        │
-        ├── 01-07_transcript-pipeline/
-        │   ├── README.md
-        │   ├── Research.md
-        │   ├── HLD.md
-        │   ├── LLD.md
-        │   └── branches/
-        │       └── add-browser-mcp/     ← escalated to sibling story
-        │           ├── README.md
-        │           └── Research.md      ← Scout found it's too big
-        │
-        └── 01-09_tool-registry/
-            ├── README.md
-            ├── Research.md
-            ├── HLD.md
-            └── LLD.md                   ← simple task, no branches needed
-```
-
-### Corresponding Git Tree
-
-```
-main
+main/dev
  │
- ├──► feat/agent-harness-hardening                              a1b2c3d start agent harness hardening
- │     │
- │     ├──► feat/agent-harness-hardening/plugin-hooks           b2c3d4e harden opencode plugin hooks
- │     │     │
- │     │     ├──► feat/agent-harness-hardening/plugin-hooks/fix-opencode-hooks
- │     │     │     │                                            c3d4e5f fix hook edge case
- │     │     │     │
- │     │     │     ├──► feat/agent-harness-hardening/plugin-hooks/fix-opencode-hooks/add-hook-regression-tests
- │     │     │     │     │                                      d4e5f6g add regression test coverage
- │     │     │     │     │
- │     │     │     ╰─────●                                      ← resolved (merged to fix-opencode-hooks)
- │     │     │     │
- │     │     │     └── e5f6g7h tests passing
- │     │     │
- │     │     ╰─────●                                            ← resolved (merged to plugin-hooks)
- │     │     │
- │     │     └── f6g7h8i hook hardening complete
- │     │
- │     ╰─────●                                                  ← resolved (merged to agent-harness-hardening)
- │     │
- │     ├──► feat/agent-harness-hardening/transcript-pipeline    g7h8i9j implement transcript pipeline
- │     │     │
- │     │     ├──► feat/agent-harness-hardening/transcript-pipeline/add-browser-mcp
- │     │     │     │                                            h8i9j0k scout browser mcp integration
- │     │     │     │
- │     │     ╰─────✕                                            ← escalated to feat/browser-mcp-integration
- │     │     │
- │     │     └── i9j0k1l transcript pipeline (sans browser mcp)
- │     │
- │     ╰─────●                                                  ← resolved (merged to agent-harness-hardening)
- │     │
- │     ├──► feat/agent-harness-hardening/tool-registry          j0k1l2m implement tool registry
- │     │     │
- │     │     └── k1l2m3n tool registry complete
- │     │
- │     ╰─────●                                                  ← resolved (merged to agent-harness-hardening)
- │     │
- │     └── l2m3n4o agent harness hardening complete
- │
- ╰─────● PR #47 merged to main
-
-
-stories/browser-mcp-integration/                               ← sibling story (escalated from transcript-pipeline)
-└──► feat/browser-mcp-integration                              m3n4o5p start browser mcp integration
-      │
-      └── (in progress...)
+ └──► feat/<story>
+       │
+       ├──► feat/<story>--<task>
+       │     │
+       │     └──► feat/<story>--<task>--<branch>
+       │           ╰─────● resolved or escalated
+       │
+       ╰─────● merged to main
 ```
 
-### Legend
+## SPARR Framework
 
-| Symbol    | Meaning                          |
-| --------- | -------------------------------- |
-| `├──►`    | Branch created                   |
-| `╰─────●` | Resolved (merged back to parent) |
-| `╰─────✕` | Escalated (became sibling story) |
+Every task follows:
+1. **Scout** - Research & exploration → `Research.md`
+2. **Plan** - High/low level design → `HLD.md`, `LLD.md`
+3. **Act** - Implementation → `Implementation.md`
+4. **Review** - Code review (when needed)
+5. **Reflect** - Learnings → experience/ directory
+
+## Story Structure
+
+```
+stories/<story-name>/
+├── README.md              # Story overview, goals, tasks
+├── tasks/
+│   └── MM-DD_<task>/
+│       ├── Research.md
+│       ├── HLD.md
+│       ├── LLD.md
+│       ├── Implementation.md
+│       └── branches/      # If task had sub-branches
+│           └── <name>/
+│               ├── Research.md
+│               ├── HLD.md
+│               ├── LLD.md
+│               └── Implementation.md
+└── ...
+```
+
+## Metrics
+
+**Total Completed**: 5 stories  
+**Latest Activity**: 2026-01-21  
+**Lines Added**: ~80+ lines across recent stories  
+**Zero Breaking Changes**: ✅
