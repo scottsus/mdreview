@@ -6,6 +6,7 @@ import * as React from "react";
 // Cleanup after each test to prevent test pollution
 afterEach(() => {
   cleanup();
+  localStorage.clear();
 });
 
 // Mock Next.js navigation hooks (used by Client Components)
