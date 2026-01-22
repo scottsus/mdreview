@@ -1,0 +1,17 @@
+{
+  "extends": "@mdreview/typescript-config/nextjs.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "types": ["vitest/globals", "@testing-library/jest-dom/vitest"],
+    "paths": {
+      "@/*": ["../../src/*"]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "vitest.config.ts",
+    "vitest.setup.ts"
+  ],
+  "exclude": ["node_modules", "dist", "coverage"]
+}
