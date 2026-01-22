@@ -1,5 +1,5 @@
 import React, { ReactElement } from "react";
-import { render, RenderOptions } from "@testing-library/react";
+import { render, RenderOptions, RenderResult } from "@testing-library/react";
 import { ThemeProvider } from "@/components/theme-provider";
 
 interface CustomRenderOptions extends RenderOptions {
@@ -24,7 +24,7 @@ const ThemeWrapper = ({
 export const renderWithTheme = (
   ui: ReactElement,
   { theme, enableSystem, ...options }: CustomRenderOptions = {}
-) =>
+): RenderResult =>
   render(ui, {
     wrapper: (props) => (
       <ThemeWrapper {...props} theme={theme} enableSystem={enableSystem} />
