@@ -27,3 +27,6 @@ Thumbs.db
 
 # Drizzle
 drizzle/*.sql
+
+# Test coverage reports
+apps/web/tests/component/coverage/

@@ -3,6 +3,7 @@
 import { getHighlightClasses } from "@/lib/highlight-styles";
 import { cn } from "@/lib/utils";
 import { Plus } from "lucide-react";
+import { useTheme } from "next-themes";
 import { Highlight, themes } from "prism-react-renderer";
 import React, { useState } from "react";
 
@@ -53,8 +54,11 @@ export function CodeBlockWithLines({
   onThreadClick,
   renderInlineForm,
 }: CodeBlockWithLinesProps) {
+  const { resolvedTheme } = useTheme();
+  const prismTheme = resolvedTheme === "dark" ? themes.vsDark : themes.github;
+
   return (
-    <Highlight code={code} language={language} theme={themes.github}>
+    <Highlight code={code} language={language} theme={prismTheme}>
       {({ tokens, getLineProps, getTokenProps }) => {
         const elements: React.ReactNode[] = [];
 
