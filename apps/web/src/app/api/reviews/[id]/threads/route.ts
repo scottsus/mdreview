@@ -15,7 +15,7 @@ export async function POST(
     const data = createThreadSchema.parse(body);
 
     const review = await db.query.reviews.findFirst({
-      where: eq(reviews.id, reviewId),
+      where: eq(reviews.slug, reviewId),
     });
 
     if (!review) {
@@ -26,7 +26,7 @@ export async function POST(
       const threadResult = await tx
         .insert(threads)
         .values({
-          reviewId,
+          reviewId: review.id,
           startLine: data.startLine,
           endLine: data.endLine,
           selectedText: data.selectedText,

@@ -9,7 +9,7 @@ import { ApiClient } from "./api-client.js";
 
 const server = new McpServer({
   name: "mdreview",
-  version: "0.4.0",
+  version: "0.6.0",
 });
 
 const apiClient = new ApiClient(process.env.MDREVIEW_BASE_URL);
@@ -49,11 +49,11 @@ server.registerTool(
       content: [
         {
           type: "text" as const,
-          text: `Review created successfully!\n\nReview URL: ${result.url}\n\nShare this URL with your reviewer. They can add inline comments by selecting text.\n\nUse 'get_review_status' with reviewId "${result.id}" to check comments.`,
+          text: `Review created successfully!\n\nReview URL: ${result.url}\n\nShare this URL with your reviewer. They can add inline comments by selecting text.\n\nUse 'get_review_status' with reviewId "${result.slug}" to check comments.`,
         },
       ],
       structuredContent: {
-        reviewId: result.id,
+        reviewId: result.slug,
         url: result.url,
         status: result.status,
       } as Record<string, unknown>,

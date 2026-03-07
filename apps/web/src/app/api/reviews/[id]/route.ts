@@ -14,7 +14,7 @@ export async function GET(
     const { id } = await params;
 
     const review = await db.query.reviews.findFirst({
-      where: eq(reviews.id, id),
+      where: eq(reviews.slug, id),
       with: {
         threads: {
           with: {

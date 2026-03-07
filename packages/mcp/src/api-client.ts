@@ -1,7 +1,6 @@
 const BASE_URL = process.env.MDREVIEW_BASE_URL || "https://mdreview.vercel.app";
 
 interface CreateReviewResponse {
-  id: string;
   slug: string;
   url: string;
   status: string;
