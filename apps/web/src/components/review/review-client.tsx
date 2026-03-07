@@ -59,7 +59,7 @@ export function ReviewClient({ initialReview }: ReviewClientProps) {
   const handleExport = useCallback(
     async (format: "yaml" | "json") => {
       try {
-        const blob = await reviewApi.exportReview(review.id, format);
+        const blob = await reviewApi.exportReview(review.slug, format);
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
@@ -79,7 +79,7 @@ export function ReviewClient({ initialReview }: ReviewClientProps) {
   const handleCreateThread = useCallback(
     async (selection: BlockSelection, body: string) => {
       try {
-        const thread = await reviewApi.createThread(review.id, {
+        const thread = await reviewApi.createThread(review.slug, {
           startLine: selection.startLine,
           endLine: selection.endLine,
           selectedText: selection.blockContent,
