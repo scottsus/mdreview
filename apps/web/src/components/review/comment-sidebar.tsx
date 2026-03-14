@@ -9,6 +9,7 @@ import {
 } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { ThreadResponse } from "@/types";
+import { MessageSquare } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -68,7 +69,6 @@ export function CommentSidebar({
 
   const handleSidebarThreadClick = (threadId: string) => {
     onThreadClick(threadId);
-
     requestAnimationFrame(() => scrollThreadCardToTop(threadId));
   };
 
@@ -99,28 +99,29 @@ export function CommentSidebar({
 
   return (
     <div
-      className="h-full flex flex-col border-l relative flex-shrink-0"
+      className="h-full flex flex-col border-l bg-card relative flex-shrink-0"
       style={{ width: `${width}px` }}
     >
-      {/* Drag handle */}
+      {/* Drag handle — visible, discoverable */}
       <div
         onMouseDown={handleMouseDown}
         className={cn(
-          "absolute left-0 top-0 bottom-0 w-1 cursor-col-resize z-10",
-          "hover:bg-primary/50 transition-colors",
-          isDragging && "bg-primary"
+          "absolute left-0 top-0 bottom-0 w-1.5 cursor-col-resize z-10 transition-colors",
+          "bg-border hover:bg-primary/40",
+          isDragging && "bg-primary/60"
         )}
       />
 
-      <div className="p-4 border-b">
-        <h2 className="font-semibold">Comments</h2>
-        <p className="text-sm text-muted-foreground">
-          {threads.length} thread{threads.length !== 1 ? "s" : ""}
-        </p>
+      {/* Sidebar header */}
+      <div className="px-4 py-3.5 border-b flex items-center justify-between">
+        <h2 className="font-semibold text-sm">Comments</h2>
+        <span className="inline-flex items-center rounded-full bg-secondary text-secondary-foreground text-xs font-medium px-2.5 py-0.5">
+          {threads.length} {threads.length === 1 ? "thread" : "threads"}
+        </span>
       </div>
 
       <ScrollArea ref={scrollAreaRootRef} className="flex-1">
-        <div className="p-4 pr-5 space-y-4 overflow-hidden">
+        <div className="p-4 pr-5 space-y-3 overflow-hidden">
           {threads.map((thread) => (
             <ThreadCard
               key={thread.id}
@@ -159,9 +160,17 @@ export function CommentSidebar({
           ))}
 
           {threads.length === 0 && (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              Hover over any block and click + to add a comment
-            </p>
+            <div className="flex flex-col items-center gap-3 py-16 text-center">
+              <div className="rounded-full bg-secondary p-3">
+                <MessageSquare className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-foreground">No comments yet</p>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  Hover over any block and click + to start a thread
+                </p>
+              </div>
+            </div>
           )}
         </div>
       </ScrollArea>

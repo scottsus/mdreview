@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Collapsible,
   CollapsibleContent,
@@ -56,32 +58,26 @@ export function ThreadCard({
   const headerContent = (
     <div
       className={cn(
-        "px-3 py-2 bg-muted/50 border-b flex items-center justify-between cursor-pointer",
-        "hover:bg-muted/70 transition-colors",
+        "px-3 py-2.5 bg-muted/60 border-b flex items-center justify-between cursor-pointer",
+        "hover:bg-muted/80 transition-colors",
       )}
       onClick={onClick}
     >
       <div className="flex items-center gap-2">
         {canCollapse &&
           (isOpen ? (
-            <ChevronDown
-              className="h-3 w-3 text-muted-foreground"
-              aria-hidden="true"
-            />
+            <ChevronDown className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
           ) : (
-            <ChevronRight
-              className="h-3 w-3 text-muted-foreground"
-              aria-hidden="true"
-            />
+            <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
           ))}
-        <span className="text-xs font-medium text-foreground">
+        <span className="text-sm font-medium text-foreground tabular-nums">
           Line {thread.startLine}
-          {thread.endLine !== thread.startLine && `-${thread.endLine}`}
+          {thread.endLine !== thread.startLine && `–${thread.endLine}`}
         </span>
       </div>
-      <span className="text-xs text-muted-foreground line-clamp-1 ml-2 italic max-w-[60%] text-right">
+      <span className="text-xs text-muted-foreground line-clamp-1 ml-2 italic max-w-[55%] text-right">
         {thread.selectedText.slice(0, 50)}
-        {thread.selectedText.length > 50 && "..."}
+        {thread.selectedText.length > 50 && "…"}
       </span>
     </div>
   );
@@ -93,8 +89,8 @@ export function ThreadCard({
       disabled={!canCollapse}
       data-thread-id={thread.id}
       className={cn(
-        "border rounded-lg overflow-hidden transition-colors scroll-mt-4",
-        isActive && "ring-2 ring-primary",
+        "border rounded-lg overflow-hidden transition-all scroll-mt-4",
+        isActive && "ring-2 ring-violet-500 dark:ring-violet-400",
         thread.resolved && "opacity-60",
       )}
     >
@@ -113,65 +109,70 @@ export function ThreadCard({
 
         {isReplying && (
           <div className="p-3 border-t bg-muted/30">
-            <textarea
+            <Textarea
               value={replyBody}
               onChange={(e) => setReplyBody(e.target.value)}
-              placeholder="Write a reply..."
-              className="w-full min-h-[60px] p-2 text-sm border rounded-md resize-none"
+              placeholder="Write a reply…"
+              className="min-h-[60px] resize-none text-sm"
               onClick={(e) => e.stopPropagation()}
               autoFocus
             />
             <div className="flex gap-2 mt-2">
-              <button
+              <Button
+                size="sm"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleSubmitReply();
                 }}
                 disabled={isSubmitting || !replyBody.trim()}
-                className="px-2 py-1 text-xs bg-primary text-primary-foreground rounded hover:bg-primary/90 disabled:opacity-50"
               >
-                {isSubmitting ? "Sending..." : "Reply"}
-              </button>
-              <button
+                {isSubmitting ? "Sending…" : "Reply"}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsReplying(false);
                   setReplyBody("");
                 }}
-                className="px-2 py-1 text-xs border rounded hover:bg-muted"
               >
                 Cancel
-              </button>
+              </Button>
             </div>
           </div>
         )}
 
         <div className="flex items-center justify-between px-3 py-2 border-t">
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={(e) => {
               e.stopPropagation();
               setIsReplying(true);
             }}
-            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+            className="h-7 gap-1 text-xs text-muted-foreground"
           >
             <Reply className="h-3 w-3" />
             Reply
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={(e) => {
               e.stopPropagation();
               onResolve();
             }}
             className={cn(
-              "flex items-center gap-1 text-xs",
+              "h-7 gap-1 text-xs",
               thread.resolved
-                ? "text-green-600"
-                : "text-muted-foreground hover:text-foreground",
+                ? "text-emerald-600 dark:text-emerald-400"
+                : "text-muted-foreground",
             )}
           >
             <Check className="h-3 w-3" />
             {thread.resolved ? "Resolved" : "Resolve"}
-          </button>
+          </Button>
         </div>
       </CollapsibleContent>
     </Collapsible>

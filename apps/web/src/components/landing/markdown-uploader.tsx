@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -66,23 +67,22 @@ export function MarkdownUploader() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div>
-        <label htmlFor="title" className="block text-sm font-medium mb-1">
-          Title (optional)
+        <label htmlFor="title" className="block text-sm font-medium mb-1.5">
+          Title <span className="text-muted-foreground font-normal">(optional)</span>
         </label>
-        <input
+        <Input
           id="title"
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="My Document Review"
-          className="w-full px-3 py-2 border rounded-md text-sm"
         />
       </div>
 
       <div>
-        <label htmlFor="content" className="block text-sm font-medium mb-1">
+        <label htmlFor="content" className="block text-sm font-medium mb-1.5">
           Markdown Content
         </label>
         <Textarea
@@ -92,12 +92,19 @@ export function MarkdownUploader() {
           placeholder="Paste your markdown content here..."
           className="min-h-[200px] font-mono text-sm"
         />
+        {content && (
+          <p className="text-xs text-muted-foreground text-right mt-1">
+            {content.split("\n").length} lines · {content.length} characters
+          </p>
+        )}
       </div>
 
-      <div className="flex items-center gap-4">
-        <label className="flex items-center gap-2 cursor-pointer text-sm text-muted-foreground hover:text-foreground transition-colors">
-          <Upload className="h-4 w-4" />
-          <span>Upload file</span>
+      <div className="flex items-center justify-between pt-1">
+        <label className="flex items-center gap-2 cursor-pointer text-sm text-muted-foreground hover:text-foreground transition-colors group">
+          <div className="flex items-center gap-2 border rounded-md px-3 py-1.5 group-hover:border-border group-hover:bg-accent transition-colors">
+            <Upload className="h-3.5 w-3.5" />
+            <span>Upload .md file</span>
+          </div>
           <input
             type="file"
             accept=".md,.markdown,.txt"
@@ -105,17 +112,18 @@ export function MarkdownUploader() {
             className="hidden"
           />
         </label>
+
+        {error && <p className="text-sm text-destructive">{error}</p>}
+
+        <Button
+          onClick={handleSubmit}
+          disabled={isSubmitting || !content.trim()}
+          size="lg"
+          className="px-8"
+        >
+          {isSubmitting ? "Creating…" : "Create Review"}
+        </Button>
       </div>
-
-      {error && <p className="text-sm text-destructive">{error}</p>}
-
-      <Button
-        onClick={handleSubmit}
-        disabled={isSubmitting || !content.trim()}
-        className="w-full"
-      >
-        {isSubmitting ? "Creating Review..." : "Create Review"}
-      </Button>
     </div>
   );
 }

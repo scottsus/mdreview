@@ -41,7 +41,7 @@ export function InlineCommentForm({
       : `Lines ${lineSelection.startLine}-${lineSelection.endLine}`;
 
   return (
-    <div data-comment-form className="my-2 border rounded-lg bg-background shadow-sm">
+    <div data-comment-form className="my-2 border rounded-lg bg-background shadow-md">
       {/* Header */}
       <div className="px-4 py-2 border-b bg-muted/30 rounded-t-lg">
         <span className="text-sm font-medium">Add a comment on {lineLabel}</span>
@@ -50,10 +50,10 @@ export function InlineCommentForm({
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="p-3">
         <TabsList className="h-8 mb-2">
-          <TabsTrigger value="write" className="text-xs px-3 py-1">
+          <TabsTrigger value="write" className="text-sm px-3 py-1">
             Write
           </TabsTrigger>
-          <TabsTrigger value="preview" className="text-xs px-3 py-1">
+          <TabsTrigger value="preview" className="text-sm px-3 py-1">
             Preview
           </TabsTrigger>
         </TabsList>
@@ -69,7 +69,7 @@ export function InlineCommentForm({
               }
             }}
             placeholder="Leave a comment"
-            className="min-h-[100px] resize-none border-muted text-gray-900 dark:text-gray-100"
+            className="min-h-[100px] resize-none border-muted text-foreground"
             autoFocus
           />
         </TabsContent>

@@ -39,11 +39,11 @@ export function CommentItem({ comment }: CommentItemProps) {
   };
 
   return (
-    <div className="p-3">
-      <div className="flex items-start gap-2">
+    <div className="p-4">
+      <div className="flex items-start gap-3">
         <Avatar className="h-6 w-6">
           <AvatarFallback
-            className={cn(isAgent ? "bg-blue-100" : "bg-green-100")}
+            className={cn(isAgent ? "bg-primary/10" : "bg-emerald-100 dark:bg-emerald-900/30")}
           >
             {isAgent ? (
               <Bot className="h-3 w-3" />
@@ -84,16 +84,16 @@ export function CommentItem({ comment }: CommentItemProps) {
           {needsExpansion && (
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="flex items-center gap-1 mt-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              className="flex items-center gap-1 mt-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               {isExpanded ? (
                 <>
-                  <ChevronUp className="h-3 w-3" />
+                  <ChevronUp className="h-4 w-4" />
                   Show less
                 </>
               ) : (
                 <>
-                  <ChevronDown className="h-3 w-3" />
+                  <ChevronDown className="h-4 w-4" />
                   Show more
                 </>
               )}
