@@ -5,6 +5,7 @@ import { useBlockSelection } from "@/hooks/use-block-selection";
 import { useThreadHighlighting } from "@/hooks/use-thread-highlighting";
 import { cn } from "@/lib/utils";
 import { BlockSelection, ThreadResponse } from "@/types";
+import dynamic from "next/dynamic";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown, { Components, ExtraProps } from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -12,8 +13,6 @@ import remarkGfm from "remark-gfm";
 import { CodeBlockWithLines } from "./code-block-with-lines";
 import { CommentableBlock } from "./commentable-block";
 import { InlineCommentForm } from "./inline-comment-form";
-
-import dynamic from "next/dynamic";
 
 const MermaidBlock = dynamic(() => import("./mermaid-block"), {
   ssr: false,

@@ -100,7 +100,7 @@ export default function MermaidBlock({
     };
 
     renderDiagram();
-  }, [code, resolvedTheme, uniqueId, blockIndex]);
+  }, [code, resolvedTheme, uniqueId]);
 
   const threadIds = getThreadsForRange(startLine, endLine);
   const hasThread = threadIds.length > 0;
