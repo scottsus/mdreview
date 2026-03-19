@@ -13,6 +13,20 @@ import { CodeBlockWithLines } from "./code-block-with-lines";
 import { CommentableBlock } from "./commentable-block";
 import { InlineCommentForm } from "./inline-comment-form";
 
+import dynamic from "next/dynamic";
+
+const MermaidBlock = dynamic(() => import("./mermaid-block"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center rounded-md bg-zinc-50 p-8 dark:bg-zinc-900">
+      <div className="flex flex-col items-center gap-2 text-muted-foreground">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-current border-t-transparent" />
+        <span className="text-sm">Loading diagram...</span>
+      </div>
+    </div>
+  ),
+});
+
 interface MarkdownViewerProps {
   content: string;
   threads: ThreadResponse[];
@@ -291,6 +305,31 @@ export function MarkdownViewer({
       const position = node?.position;
       const sourceStartLine = (position?.start?.line ?? 0) + 1;
 
+      if (language === "mermaid") {
+        const startLine = position?.start?.line ?? 1;
+        const endLine = position?.end?.line ?? startLine;
+        const blockIndex = registerBlock(startLine, endLine);
+
+        return (
+          <MermaidBlock
+            code={codeContent}
+            blockIndex={blockIndex}
+            startLine={startLine}
+            endLine={endLine}
+            selectedRange={selectedRange}
+            isSelecting={selectionState.isSelecting}
+            finalSelection={selectionState.finalSelection}
+            getThreadsForRange={getThreadsForRange}
+            activeThreadId={activeThreadId}
+            onPointerDown={handleBlockPointerDownWithClear}
+            onAddComment={handleAddComment}
+            onThreadClick={onThreadClick}
+            onCommentSubmit={handleCommentSubmit}
+            onCommentCancel={handleCommentCancel}
+          />
+        );
+      }
+
       return (
         <CodeBlockWithLines
           code={codeContent}
@@ -324,6 +363,7 @@ export function MarkdownViewer({
     [
       activeThreadId,
       getThreadsForLine,
+      getThreadsForRange,
       handleBlockPointerDownWithClear,
       handleCommentSubmit,
       handleCommentCancel,
