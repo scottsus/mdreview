@@ -23,9 +23,10 @@ server.registerTool(
       "Create a markdown document review and get a shareable URL. Share this URL with the reviewer and they can add inline comments.",
     inputSchema: {
       filePath: z.string().describe("The path to the markdown file to review"),
+      title: z.string().optional().describe("An optional human-readable title for the review"),
     },
   },
-  async ({ filePath }) => {
+  async ({ filePath, title }) => {
     let content: string;
     try {
       content = fs.readFileSync(filePath, "utf-8");
@@ -43,7 +44,7 @@ server.registerTool(
       };
     }
 
-    const result = await apiClient.createReview(content);
+    const result = await apiClient.createReview(content, title);
 
     return {
       content: [

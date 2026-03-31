@@ -51,13 +51,14 @@ export class ApiClient {
     this.baseUrl = baseUrl || BASE_URL;
   }
 
-  async createReview(content: string): Promise<CreateReviewResponse> {
+  async createReview(content: string, title?: string): Promise<CreateReviewResponse> {
     const response = await fetch(`${this.baseUrl}/api/reviews`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         content,
         source: "agent",
+        ...(title && { title }),
       }),
     });
 
