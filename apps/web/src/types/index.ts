@@ -3,6 +3,7 @@ import { z } from "zod";
 export const createReviewSchema = z.object({
   content: z.string().min(1, "Content is required"),
   title: z.string().max(255).optional(),
+  filePath: z.string().max(500).optional().describe("Fallback title when title not provided"),
   source: z.enum(["manual", "agent"]).default("manual"),
   agentId: z.string().max(100).optional(),
 });

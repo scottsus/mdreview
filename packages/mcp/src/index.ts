@@ -44,7 +44,7 @@ server.registerTool(
       };
     }
 
-    const result = await apiClient.createReview(content, title || filePath);
+    const result = await apiClient.createReview(content, title, filePath);
 
     return {
       content: [
