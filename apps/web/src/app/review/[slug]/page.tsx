@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { ReviewClient } from "@/components/review/review-client";
 import { db } from "@/db";
 import { reviews } from "@/db/schema";
@@ -28,6 +29,19 @@ async function getReviewBySlug(slug: string) {
   if (!review) return null;
 
   return transformReviewToResponse(review, config.baseUrl);
+}
+
+export async function generateMetadata({ params }: ReviewPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const review = await getReviewBySlug(slug);
+
+  if (!review) {
+    return { title: "Review Not Found" };
+  }
+
+  return {
+    title: review.title || "Untitled Review",
+  };
 }
 
 export default async function ReviewPage({ params }: ReviewPageProps) {
