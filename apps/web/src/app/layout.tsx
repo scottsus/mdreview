@@ -17,6 +17,9 @@ const plusJakarta = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   title: "MDReview - Markdown Document Review",
   description: "A collaborative markdown review tool with inline commenting",
+  icons: {
+    icon: "/favicon.png",
+  },
 };
 
 export default function RootLayout({
