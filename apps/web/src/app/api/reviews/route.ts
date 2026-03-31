@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
       .values({
         slug,
         content: data.content,
-        title: data.title || data.filePath || null,
+        title: data.title,
         source: data.source,
         agentId: data.agentId,
       })
