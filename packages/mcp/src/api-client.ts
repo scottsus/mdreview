@@ -1,4 +1,4 @@
-const BASE_URL = process.env.MDREVIEW_BASE_URL || "https://mdreview.vercel.app";
+const BASE_URL = process.env.MDREVIEW_BASE_URL || "https://markdown-review.vercel.app";
 
 interface CreateReviewResponse {
   slug: string;
