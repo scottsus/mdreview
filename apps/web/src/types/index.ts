@@ -75,3 +75,22 @@ export interface BlockSelection {
 }
 
 export type LineSelection = BlockSelection;
+
+// ─── API Keys ────────────────────────────────────────────────────────────────
+
+export const createApiKeySchema = z.object({
+  name: z.string().min(1, "Name is required").max(100, "Name must be 100 characters or fewer"),
+})
+
+export interface ApiKeyResponse {
+  id: string
+  name: string
+  keyPrefix: string
+  lastUsedAt: string | null
+  expiresAt: string | null
+  createdAt: string
+}
+
+export interface CreateApiKeyResponse extends ApiKeyResponse {
+  key: string // raw key — only present at creation time, never stored
+}
