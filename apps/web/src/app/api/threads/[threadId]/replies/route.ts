@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { comments, threads } from "@/db/schema";
 import { errorResponse, handleApiError, successResponse } from "@/lib/api";
+import { assertReviewAccess, optionalAuth } from "@/lib/auth-helpers";
 import { createReplySchema } from "@/types";
 import { eq } from "drizzle-orm";
 import { NextRequest } from "next/server";
@@ -14,12 +15,27 @@ export async function POST(
     const body = await request.json();
     const data = createReplySchema.parse(body);
 
+    // Fetch thread with parent review — need review.userId for ownership check
     const thread = await db.query.threads.findFirst({
       where: eq(threads.id, threadId),
+      with: {
+        review: {
+          columns: { userId: true },
+        },
+      },
     });
 
     if (!thread) {
       return errorResponse("not_found", "Thread not found", 404);
+    }
+
+    // Resolve caller
+    const caller = await optionalAuth(request)
+
+    // Gate via parent review ownership
+    const denied = assertReviewAccess(thread.review, caller)
+    if (denied) {
+      return denied
     }
 
     const result = await db

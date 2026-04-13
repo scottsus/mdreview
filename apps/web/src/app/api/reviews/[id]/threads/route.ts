@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { comments, reviews, threads } from "@/db/schema";
 import { errorResponse, handleApiError, successResponse } from "@/lib/api";
+import { assertReviewAccess, optionalAuth } from "@/lib/auth-helpers";
 import { createThreadSchema } from "@/types";
 import { eq } from "drizzle-orm";
 import { NextRequest } from "next/server";
@@ -10,16 +11,27 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const { id: reviewId } = await params;
+    const { id: reviewSlug } = await params;
     const body = await request.json();
     const data = createThreadSchema.parse(body);
 
+    // Fetch review — needed for both the FK and the ownership check
     const review = await db.query.reviews.findFirst({
-      where: eq(reviews.slug, reviewId),
+      where: eq(reviews.slug, reviewSlug),
+      columns: { id: true, userId: true, slug: true },
     });
 
     if (!review) {
       return errorResponse("not_found", "Review not found", 404);
+    }
+
+    // Resolve caller (optional auth — public reviews allow anonymous threads)
+    const caller = await optionalAuth(request)
+
+    // Gate: private review = owner only
+    const denied = assertReviewAccess(review, caller)
+    if (denied) {
+      return denied
     }
 
     const result = await db.transaction(async (tx) => {

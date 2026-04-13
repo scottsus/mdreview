@@ -5,8 +5,7 @@ import { NextRequest } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/db"
 import { apiKeys } from "@/db/schema"
-
-console.log("[auth-helpers] Module loaded")
+import { errorResponse } from "@/lib/api"
 
 // ─── Key generation ──────────────────────────────────────────────────────────
 
@@ -15,12 +14,7 @@ console.log("[auth-helpers] Module loaded")
  * Format: mdr_<64 hex chars> (256 bits of entropy)
  */
 export function generateApiKey(): string {
-  const raw = `mdr_${randomBytes(32).toString("hex")}`
-  console.log("[auth-helpers] generateApiKey: generated new key", {
-    prefix: raw.slice(0, 10),
-    length: raw.length,
-  })
-  return raw
+  return `mdr_${randomBytes(32).toString("hex")}`
 }
 
 /**
@@ -49,22 +43,8 @@ export function getKeyPrefix(key: string): string {
  * 4. Returns the matching record or null
  */
 export async function validateApiKey(rawKey: string) {
-  console.log("[auth-helpers] validateApiKey: starting validation", {
-    keyPrefix: rawKey.slice(0, 10),
-    keyLength: rawKey.length,
-  })
-
   const hash = hashApiKey(rawKey)
-  console.log("[auth-helpers] validateApiKey: computed SHA-256 hash", {
-    hashPrefix: hash.slice(0, 12),
-  })
-
   const now = new Date()
-
-  console.log("[auth-helpers] validateApiKey: querying DB for key record", {
-    hashPrefix: hash.slice(0, 12),
-    now: now.toISOString(),
-  })
 
   const key = await db.query.apiKeys.findFirst({
     where: and(
@@ -76,24 +56,10 @@ export async function validateApiKey(rawKey: string) {
   })
 
   if (!key) {
-    console.log("[auth-helpers] validateApiKey: key not found or invalid", {
-      hashPrefix: hash.slice(0, 12),
-    })
     return null
   }
 
-  console.log("[auth-helpers] validateApiKey: key is valid", {
-    keyId: key.id,
-    userId: key.userId,
-    keyName: key.name,
-    keyPrefix: key.keyPrefix,
-    lastUsedAt: key.lastUsedAt?.toISOString() ?? null,
-  })
-
   // Fire-and-forget: update lastUsedAt without blocking the response
-  console.log("[auth-helpers] validateApiKey: firing background lastUsedAt update", {
-    keyId: key.id,
-  })
   db.update(apiKeys)
     .set({ lastUsedAt: new Date() })
     .where(eq(apiKeys.id, key.id))
@@ -126,58 +92,72 @@ export interface AuthContext {
  *   if (!caller) return errorResponse("unauthorized", "Authentication required", 401)
  */
 export async function requireAuth(request: NextRequest): Promise<AuthContext | null> {
-  console.log("[auth-helpers] requireAuth: starting dual-path auth resolution", {
-    method: request.method,
-    url: request.url,
-  })
-
   const authHeader = request.headers.get("authorization")
-  console.log("[auth-helpers] requireAuth: checked Authorization header", {
-    hasHeader: !!authHeader,
-    isBearer: authHeader?.startsWith("Bearer ") ?? false,
-  })
 
   // Path 1: Bearer API key
   if (authHeader?.startsWith("Bearer ")) {
     const rawKey = authHeader.slice(7)
-    console.log("[auth-helpers] requireAuth: attempting API key path", {
-      keyLength: rawKey.length,
-      keyPrefix: rawKey.slice(0, 10),
-    })
-
     const keyRecord = await validateApiKey(rawKey)
 
     if (keyRecord) {
-      console.log("[auth-helpers] requireAuth: API key auth succeeded", {
-        userId: keyRecord.userId,
-        keyId: keyRecord.id,
-        keyName: keyRecord.name,
-      })
       return { userId: keyRecord.userId, source: "api_key" }
     }
 
-    // Bearer header present but key invalid — return 401 immediately.
+    // Bearer header present but key invalid — return null immediately.
     // Do not fall through to session path (prevents auth confusion).
-    console.log("[auth-helpers] requireAuth: API key auth failed — Bearer header present but key invalid")
     return null
   }
 
   // Path 2: NextAuth session (JWT cookie)
-  console.log("[auth-helpers] requireAuth: no Bearer header, attempting session path")
   const session = await auth()
-  console.log("[auth-helpers] requireAuth: session resolved", {
-    hasSession: !!session,
-    userId: session?.user?.id ?? null,
-    userEmail: session?.user?.email ?? null,
-  })
 
   if (session?.user?.id) {
-    console.log("[auth-helpers] requireAuth: session auth succeeded", {
-      userId: session.user.id,
-    })
     return { userId: session.user.id, source: "session" }
   }
 
-  console.log("[auth-helpers] requireAuth: both auth paths failed — returning null")
+  return null
+}
+
+/**
+ * Like requireAuth, but signals at the call site that auth is optional.
+ * Returns null for anonymous callers — the caller decides whether to gate on that.
+ *
+ * Example:
+ *   const caller = await optionalAuth(request)
+ *   // caller is null for anonymous requests — proceed, but don't stamp userId
+ */
+export async function optionalAuth(request: NextRequest): Promise<AuthContext | null> {
+  return requireAuth(request)
+}
+
+/**
+ * Asserts that the caller has access to a review, based on its ownership model.
+ * 1. review.userId is null → public review, access always granted (returns null)
+ * 2. review.userId is set, caller is null → unauthenticated → returns 401
+ * 3. review.userId is set, caller.userId !== review.userId → wrong owner → returns 404
+ *    (404 is intentional: prevents slug enumeration — "exists but forbidden" looks like "not found")
+ * 4. Ownership matches → returns null (access granted)
+ *
+ * Example:
+ *   const denied = assertReviewAccess(review, caller)
+ *   if (denied) return denied
+ */
+export function assertReviewAccess(
+  review: { userId: string | null },
+  caller: AuthContext | null,
+): Response | null {
+  if (review.userId === null) {
+    return null
+  }
+
+  if (!caller) {
+    return errorResponse("unauthorized", "Authentication required", 401)
+  }
+
+  if (caller.userId !== review.userId) {
+    // 404 (not 403): prevents slug enumeration — unauthorized == not found from outside
+    return errorResponse("not_found", "Review not found", 404)
+  }
+
   return null
 }

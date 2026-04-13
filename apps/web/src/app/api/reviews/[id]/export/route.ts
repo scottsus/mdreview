@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { reviews } from "@/db/schema";
 import { errorResponse, handleApiError } from "@/lib/api";
+import { assertReviewAccess, optionalAuth } from "@/lib/auth-helpers";
 import { exportFormatSchema } from "@/types";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
@@ -17,6 +18,26 @@ export async function GET(
       searchParams.get("format") || "yaml",
     );
 
+    // Step 1: lightweight stub for access check
+    const stub = await db.query.reviews.findFirst({
+      where: eq(reviews.slug, id),
+      columns: { id: true, userId: true, slug: true },
+    });
+
+    if (!stub) {
+      return errorResponse("not_found", "Review not found", 404);
+    }
+
+    // Step 2: resolve caller
+    const caller = await optionalAuth(request)
+
+    // Step 3: gate
+    const denied = assertReviewAccess(stub, caller)
+    if (denied) {
+      return denied
+    }
+
+    // Step 4: full fetch with threads
     const review = await db.query.reviews.findFirst({
       where: eq(reviews.slug, id),
       with: {
@@ -32,6 +53,7 @@ export async function GET(
     });
 
     if (!review) {
+      // Extremely unlikely race — review deleted between stub and full fetch
       return errorResponse("not_found", "Review not found", 404);
     }
 
