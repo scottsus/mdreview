@@ -187,3 +187,39 @@ export type User = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert
 export type Account = typeof accounts.$inferSelect
 export type Session = typeof sessions.$inferSelect
+
+// ─── API Keys ───────────────────────────────────────────────────────────────
+
+export const apiKeys = pgTable(
+  "api_key",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    name: varchar("name", { length: 100 }).notNull(),
+    keyHash: text("key_hash").notNull().unique(),
+    keyPrefix: varchar("key_prefix", { length: 10 }).notNull(),
+    lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => ({
+    apiKeysUserIdIdx: index("api_keys_user_id_idx").on(table.userId),
+    apiKeysKeyHashIdx: index("api_keys_key_hash_idx").on(table.keyHash),
+  }),
+)
+
+export const apiKeysRelations = relations(apiKeys, ({ one }) => ({
+  user: one(users, { fields: [apiKeys.userId], references: [users.id] }),
+}))
+
+export const usersRelations = relations(users, ({ many }) => ({
+  apiKeys: many(apiKeys),
+}))
+
+export type ApiKey = typeof apiKeys.$inferSelect
+export type NewApiKey = typeof apiKeys.$inferInsert
