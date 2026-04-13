@@ -5,10 +5,18 @@ export type ReviewWithThreads = Review & {
   threads: (Thread & { comments: Comment[] })[];
 };
 
+/**
+ * Transforms a full review DB record into an API response shape.
+ * 1. Maps all thread and comment fields
+ * 2. Computes isOwner from callerId vs review.userId
+ */
 export function transformReviewToResponse(
   review: ReviewWithThreads,
   baseUrl: string,
+  callerId: string | null = null,
 ): ReviewResponse {
+  const isOwner = review.userId !== null && callerId === review.userId
+
   return {
     id: review.id,
     slug: review.slug,
@@ -19,6 +27,7 @@ export function transformReviewToResponse(
     decisionMessage: review.decisionMessage,
     decidedAt: review.decidedAt?.toISOString() ?? null,
     source: review.source,
+    isOwner,
     threads: review.threads.map(transformThreadToResponse),
     createdAt: review.createdAt.toISOString(),
     updatedAt: review.updatedAt.toISOString(),

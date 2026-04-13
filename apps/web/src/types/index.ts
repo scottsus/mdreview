@@ -41,6 +41,7 @@ export interface ReviewResponse {
   threads: ThreadResponse[];
   createdAt: string;
   updatedAt: string;
+  isOwner: boolean;
 }
 
 export interface ThreadResponse {

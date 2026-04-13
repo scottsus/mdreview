@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { reviews } from "@/db/schema";
 import { handleApiError, successResponse } from "@/lib/api";
+import { optionalAuth } from "@/lib/auth-helpers";
 import { config } from "@/lib/config";
 import { generateSlug } from "@/lib/slug";
 import { createReviewSchema } from "@/types";
@@ -10,6 +11,8 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const data = createReviewSchema.parse(body);
+
+    const caller = await optionalAuth(request)
 
     const slug = generateSlug();
 
@@ -21,6 +24,7 @@ export async function POST(request: NextRequest) {
         title: data.title,
         source: data.source,
         agentId: data.agentId,
+        userId: caller?.userId ?? null,
       })
       .returning();
 

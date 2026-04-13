@@ -23,6 +23,9 @@ export const reviews = pgTable(
     decidedAt: timestamp("decided_at", { withTimezone: true }),
     source: varchar("source", { length: 20 }).notNull().default("manual"),
     agentId: varchar("agent_id", { length: 100 }),
+    // nullable — anonymous creation is valid; existing rows get NULL (public)
+    // text to match users.id convention; onDelete: "set null" keeps reviews on user deletion
+    userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -36,11 +39,16 @@ export const reviews = pgTable(
     slugIdx: index("reviews_slug_idx").on(table.slug),
     statusIdx: index("reviews_status_idx").on(table.status),
     createdAtIdx: index("reviews_created_at_idx").on(table.createdAt),
+    userIdIdx: index("reviews_user_id_idx").on(table.userId),
   }),
 );
 
-export const reviewsRelations = relations(reviews, ({ many }) => ({
+export const reviewsRelations = relations(reviews, ({ one, many }) => ({
   threads: many(threads),
+  user: one(users, {
+    fields: [reviews.userId],
+    references: [users.id],
+  }),
 }));
 
 export const threads = pgTable(
@@ -219,6 +227,7 @@ export const apiKeysRelations = relations(apiKeys, ({ one }) => ({
 
 export const usersRelations = relations(users, ({ many }) => ({
   apiKeys: many(apiKeys),
+  reviews: many(reviews),
 }))
 
 export type ApiKey = typeof apiKeys.$inferSelect
