@@ -1,18 +1,17 @@
-import type { Metadata } from "next";
-import { Inter, Plus_Jakarta_Sans } from "next/font/google";
-import { Toaster } from "sonner";
+import type { Metadata } from "next"
+import { Inter, Plus_Jakarta_Sans } from "next/font/google"
+import { Toaster } from "sonner"
 
-import { ThemeProvider } from "@/components/theme-provider";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
-import "./globals.css";
+import { ThemeProvider } from "@/components/theme-provider"
+import "./globals.css"
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   variable: "--font-display",
   weight: ["400", "500", "600", "700", "800"],
-});
+})
 
 export const metadata: Metadata = {
   title: "MDReview - Markdown Document Review",
@@ -20,12 +19,12 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.png",
   },
-};
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -38,11 +37,8 @@ export default function RootLayout({
         >
           {children}
           <Toaster richColors position="bottom-right" />
-          <div className="fixed top-4 right-4 z-50">
-            <ThemeToggle />
-          </div>
         </ThemeProvider>
       </body>
     </html>
-  );
+  )
 }
