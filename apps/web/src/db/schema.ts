@@ -11,130 +11,12 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
-export const reviews = pgTable(
-  "reviews",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    slug: varchar("slug", { length: 12 }).unique().notNull(),
-    content: text("content").notNull(),
-    title: varchar("title", { length: 255 }),
-    status: varchar("status", { length: 20 }).notNull().default("pending"),
-    decisionMessage: text("decision_message"),
-    decidedAt: timestamp("decided_at", { withTimezone: true }),
-    source: varchar("source", { length: 20 }).notNull().default("manual"),
-    agentId: varchar("agent_id", { length: 100 }),
-    // nullable — anonymous creation is valid; existing rows get NULL (public)
-    // text to match users.id convention; onDelete: "set null" keeps reviews on user deletion
-    userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true })
-      .notNull()
-      .defaultNow()
-      .$onUpdate(() => new Date()),
-    expiresAt: timestamp("expires_at", { withTimezone: true }),
-  },
-  (table) => ({
-    slugIdx: index("reviews_slug_idx").on(table.slug),
-    statusIdx: index("reviews_status_idx").on(table.status),
-    createdAtIdx: index("reviews_created_at_idx").on(table.createdAt),
-    userIdIdx: index("reviews_user_id_idx").on(table.userId),
-  }),
-);
-
-export const reviewsRelations = relations(reviews, ({ one, many }) => ({
-  threads: many(threads),
-  user: one(users, {
-    fields: [reviews.userId],
-    references: [users.id],
-  }),
-}));
-
-export const threads = pgTable(
-  "threads",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    reviewId: uuid("review_id")
-      .notNull()
-      .references(() => reviews.id, { onDelete: "cascade" }),
-    startLine: integer("start_line").notNull(),
-    endLine: integer("end_line").notNull(),
-    selectedText: text("selected_text").notNull(),
-    resolved: boolean("resolved").notNull().default(false),
-    resolvedAt: timestamp("resolved_at", { withTimezone: true }),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true })
-      .notNull()
-      .defaultNow()
-      .$onUpdate(() => new Date()),
-  },
-  (table) => ({
-    reviewIdIdx: index("threads_review_id_idx").on(table.reviewId),
-    createdAtIdx: index("threads_created_at_idx").on(table.createdAt),
-  }),
-);
-
-export const threadsRelations = relations(threads, ({ one, many }) => ({
-  review: one(reviews, {
-    fields: [threads.reviewId],
-    references: [reviews.id],
-  }),
-  comments: many(comments),
-}));
-
-export const comments = pgTable(
-  "comments",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    threadId: uuid("thread_id")
-      .notNull()
-      .references(() => threads.id, { onDelete: "cascade" }),
-    body: text("body").notNull(),
-    authorType: varchar("author_type", { length: 20 })
-      .notNull()
-      .default("human"),
-    authorName: varchar("author_name", { length: 100 }),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true })
-      .notNull()
-      .defaultNow()
-      .$onUpdate(() => new Date()),
-  },
-  (table) => ({
-    threadIdIdx: index("comments_thread_id_idx").on(table.threadId),
-    createdAtIdx: index("comments_created_at_idx").on(table.createdAt),
-  }),
-);
-
-export const commentsRelations = relations(comments, ({ one }) => ({
-  thread: one(threads, {
-    fields: [comments.threadId],
-    references: [threads.id],
-  }),
-}));
-
-export type Review = typeof reviews.$inferSelect;
-export type NewReview = typeof reviews.$inferInsert;
-export type Thread = typeof threads.$inferSelect;
-export type NewThread = typeof threads.$inferInsert;
-export type Comment = typeof comments.$inferSelect;
-export type NewComment = typeof comments.$inferInsert;
-
-export type ReviewStatus =
-  | "pending"
-  | "approved"
-  | "changes_requested"
-  | "rejected";
-
 // ─── Auth.js / NextAuth v5 tables ──────────────────────────────────────────
 // Required by @auth/drizzle-adapter. Table names match Auth.js conventions.
 // userId columns use text (not uuid) to match adapter's default TypeScript types,
 // even though the rest of the schema uses uuid PKs. text stores UUIDs fine.
+// IMPORTANT: auth tables must be defined FIRST so that reviews/apiKeys can
+// reference users.id without a forward-reference initialization problem.
 
 export const users = pgTable("user", {
   id: text("id")
@@ -190,11 +72,117 @@ export const verificationTokens = pgTable(
   }),
 )
 
-// Auth table inferred types
-export type User = typeof users.$inferSelect
-export type NewUser = typeof users.$inferInsert
-export type Account = typeof accounts.$inferSelect
-export type Session = typeof sessions.$inferSelect
+// ─── Reviews, Threads, Comments ─────────────────────────────────────────────
+// These tables reference users.id, so they must come after the auth tables.
+
+export const reviews = pgTable(
+  "reviews",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    slug: varchar("slug", { length: 12 }).unique().notNull(),
+    content: text("content").notNull(),
+    title: varchar("title", { length: 255 }),
+    status: varchar("status", { length: 20 }).notNull().default("pending"),
+    decisionMessage: text("decision_message"),
+    decidedAt: timestamp("decided_at", { withTimezone: true }),
+    source: varchar("source", { length: 20 }).notNull().default("manual"),
+    agentId: varchar("agent_id", { length: 100 }),
+    // nullable — anonymous creation is valid; existing rows get NULL (public)
+    // text to match users.id convention; onDelete: "set null" keeps reviews on user deletion
+    userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
+  },
+  (table) => ({
+    slugIdx: index("reviews_slug_idx").on(table.slug),
+    statusIdx: index("reviews_status_idx").on(table.status),
+    createdAtIdx: index("reviews_created_at_idx").on(table.createdAt),
+    userIdIdx: index("reviews_user_id_idx").on(table.userId),
+  }),
+);
+
+export const threads = pgTable(
+  "threads",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    reviewId: uuid("review_id")
+      .notNull()
+      .references(() => reviews.id, { onDelete: "cascade" }),
+    startLine: integer("start_line").notNull(),
+    endLine: integer("end_line").notNull(),
+    selectedText: text("selected_text").notNull(),
+    resolved: boolean("resolved").notNull().default(false),
+    resolvedAt: timestamp("resolved_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => ({
+    reviewIdIdx: index("threads_review_id_idx").on(table.reviewId),
+    createdAtIdx: index("threads_created_at_idx").on(table.createdAt),
+  }),
+);
+
+export const comments = pgTable(
+  "comments",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    threadId: uuid("thread_id")
+      .notNull()
+      .references(() => threads.id, { onDelete: "cascade" }),
+    body: text("body").notNull(),
+    authorType: varchar("author_type", { length: 20 })
+      .notNull()
+      .default("human"),
+    authorName: varchar("author_name", { length: 100 }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => ({
+    threadIdIdx: index("comments_thread_id_idx").on(table.threadId),
+    createdAtIdx: index("comments_created_at_idx").on(table.createdAt),
+  }),
+);
+
+// ─── Relations ───────────────────────────────────────────────────────────────
+
+export const reviewsRelations = relations(reviews, ({ one, many }) => ({
+  threads: many(threads),
+  user: one(users, {
+    fields: [reviews.userId],
+    references: [users.id],
+  }),
+}));
+
+export const threadsRelations = relations(threads, ({ one, many }) => ({
+  review: one(reviews, {
+    fields: [threads.reviewId],
+    references: [reviews.id],
+  }),
+  comments: many(comments),
+}));
+
+export const commentsRelations = relations(comments, ({ one }) => ({
+  thread: one(threads, {
+    fields: [comments.threadId],
+    references: [threads.id],
+  }),
+}));
 
 // ─── API Keys ───────────────────────────────────────────────────────────────
 
@@ -230,5 +218,28 @@ export const usersRelations = relations(users, ({ many }) => ({
   reviews: many(reviews),
 }))
 
+// ─── Type exports ─────────────────────────────────────────────────────────
+
+// Auth table inferred types
+export type User = typeof users.$inferSelect
+export type NewUser = typeof users.$inferInsert
+export type Account = typeof accounts.$inferSelect
+export type Session = typeof sessions.$inferSelect
+
+// Review table inferred types
+export type Review = typeof reviews.$inferSelect;
+export type NewReview = typeof reviews.$inferInsert;
+export type Thread = typeof threads.$inferSelect;
+export type NewThread = typeof threads.$inferInsert;
+export type Comment = typeof comments.$inferSelect;
+export type NewComment = typeof comments.$inferInsert;
+
+export type ReviewStatus =
+  | "pending"
+  | "approved"
+  | "changes_requested"
+  | "rejected";
+
+// API key inferred types
 export type ApiKey = typeof apiKeys.$inferSelect
 export type NewApiKey = typeof apiKeys.$inferInsert
