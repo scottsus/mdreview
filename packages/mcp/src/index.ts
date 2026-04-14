@@ -178,6 +178,12 @@ server.registerTool(
 );
 
 async function main() {
+  if (!process.env.MDREVIEW_API_KEY) {
+    console.error(
+      "Warning: MDREVIEW_API_KEY is not set. Reviews created will be publicly accessible to anyone with the URL.",
+    );
+  }
+
   const transport = new StdioServerTransport();
   await server.connect(transport);
   console.error("MDReview MCP Server running on stdio");
