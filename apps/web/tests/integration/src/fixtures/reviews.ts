@@ -59,9 +59,13 @@ export async function createTestReview(
   return response.json();
 }
 
-export async function getReview(reviewId: string): Promise<FullReview> {
+export async function getReview(slug: string, apiKey?: string): Promise<FullReview> {
+  const headers: Record<string, string> = {};
+  if (apiKey) headers["Authorization"] = `Bearer ${apiKey}`;
+
   const response = await fetch(
-    `${config.apiBaseUrl}/api/reviews/${reviewId}`,
+    `${config.apiBaseUrl}/api/reviews/${slug}`,
+    { headers },
   );
 
   if (!response.ok) {

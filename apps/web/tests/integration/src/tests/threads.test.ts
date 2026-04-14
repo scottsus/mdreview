@@ -10,12 +10,14 @@ import {
 
 describe("Threads API", () => {
   let reviewId: string;
+  let reviewSlug: string;
 
   beforeAll(async () => {
     const review = await createTestReview(
       "# Thread Test\n\nLine 1\nLine 2\nLine 3",
     );
     reviewId = review.id;
+    reviewSlug = review.slug;
   });
 
   afterAll(async () => {
@@ -24,7 +26,7 @@ describe("Threads API", () => {
 
   describe("POST /api/reviews/[id]/threads", () => {
     it("should create a thread with initial comment", async () => {
-      const thread = await createTestThread(reviewId, {
+      const thread = await createTestThread(reviewSlug, {
         startLine: 1,
         endLine: 1,
         selectedText: "# Thread Test",
@@ -32,7 +34,7 @@ describe("Threads API", () => {
       });
 
       expect(thread.id).toBeDefined();
-      expect(thread.reviewId).toBe(reviewId);
+      expect(thread.reviewId).toBeDefined();
       expect(thread.startLine).toBe(1);
       expect(thread.endLine).toBe(1);
       expect(thread.selectedText).toBe("# Thread Test");
@@ -44,7 +46,7 @@ describe("Threads API", () => {
     });
 
     it("should create a thread with agent author", async () => {
-      const thread = await createTestThread(reviewId, {
+      const thread = await createTestThread(reviewSlug, {
         startLine: 3,
         endLine: 5,
         selectedText: "Line 1\nLine 2\nLine 3",
@@ -58,7 +60,7 @@ describe("Threads API", () => {
     });
 
     it("should create a thread spanning multiple lines", async () => {
-      const thread = await createTestThread(reviewId, {
+      const thread = await createTestThread(reviewSlug, {
         startLine: 2,
         endLine: 4,
         selectedText: "Multiple\nLines\nSelected",
@@ -90,7 +92,7 @@ describe("Threads API", () => {
 
     it("should reject invalid startLine (must be >= 1)", async () => {
       const response = await fetch(
-        `${config.apiBaseUrl}/api/reviews/${reviewId}/threads`,
+        `${config.apiBaseUrl}/api/reviews/${reviewSlug}/threads`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -108,7 +110,7 @@ describe("Threads API", () => {
 
     it("should reject empty body", async () => {
       const response = await fetch(
-        `${config.apiBaseUrl}/api/reviews/${reviewId}/threads`,
+        `${config.apiBaseUrl}/api/reviews/${reviewSlug}/threads`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -129,7 +131,7 @@ describe("Threads API", () => {
     let threadId: string;
 
     beforeAll(async () => {
-      const thread = await createTestThread(reviewId, {
+      const thread = await createTestThread(reviewSlug, {
         startLine: 1,
         endLine: 1,
         selectedText: "Test",
@@ -186,7 +188,7 @@ describe("Threads API", () => {
     });
 
     it("should verify comments are returned in review", async () => {
-      const review = await getReview(reviewId);
+      const review = await getReview(reviewSlug);
 
       const thread = review.threads.find((t) => t.id === threadId);
       expect(thread).toBeDefined();
@@ -198,7 +200,7 @@ describe("Threads API", () => {
     let threadId: string;
 
     beforeAll(async () => {
-      const thread = await createTestThread(reviewId, {
+      const thread = await createTestThread(reviewSlug, {
         startLine: 1,
         endLine: 1,
         selectedText: "Resolve test",

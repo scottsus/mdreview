@@ -27,14 +27,18 @@ export interface ThreadResult {
 }
 
 export async function createTestThread(
-  reviewId: string,
+  slug: string,
   data: CreateThreadData,
+  apiKey?: string,
 ): Promise<ThreadResult> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (apiKey) headers["Authorization"] = `Bearer ${apiKey}`;
+
   const response = await fetch(
-    `${config.apiBaseUrl}/api/reviews/${reviewId}/threads`,
+    `${config.apiBaseUrl}/api/reviews/${slug}/threads`,
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify(data),
     },
   );
