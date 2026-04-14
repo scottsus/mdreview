@@ -10,7 +10,9 @@ MDReview allows you to upload markdown content, share a unique review URL, and c
 
 ## Features
 
-- **No Auth Required**: Create and participate in reviews anonymously via shareable URLs.
+- **Google OAuth**: Sign in with Google to create owned, private reviews.
+- **API Keys**: Generate API keys for agent access from the Settings page.
+- **Anonymous Reviews**: Create reviews without signing in — shareable via URL.
 - **Block-level Commenting**: Add comments to any rendered markdown element (paragraphs, headers, tables, etc.).
 - **Line-level Code Review**: Comment on specific lines within fenced code blocks.
 - **Multi-selection**: Click and drag to select multiple blocks or lines for a single comment thread.
@@ -21,6 +23,7 @@ MDReview allows you to upload markdown content, share a unique review URL, and c
 ## Tech Stack
 
 - **Frontend**: Next.js 15 (App Router), Tailwind CSS, shadcn/ui
+- **Auth**: NextAuth v5 (Auth.js) with Google OAuth + Drizzle adapter
 - **Database**: PostgreSQL with Drizzle ORM
 - **Monorepo**: Turborepo + pnpm
 - **Content**: React Markdown + Prism (for code highlighting)
@@ -85,23 +88,43 @@ MDReview includes a Model Context Protocol (MCP) server, allowing AI agents to i
 - `add_comment`: Add a reply to an existing comment thread.
 - `resolve_thread`: Mark a comment thread as resolved.
 
-### Usage with Claude Desktop
+### Setup
 
-Add the following to your `claude_desktop_config.json`:
+1. Generate an API key from [markdown-review.vercel.app/settings/api-keys](https://markdown-review.vercel.app/settings/api-keys)
 
+2. Add the MCP server to your client config:
+
+**opencode** (`~/.config/opencode/opencode.json`):
 ```json
 {
-  "mcpServers": {
+  "mcp": {
     "mdreview": {
-      "command": "node",
-      "args": ["/path/to/mdreview/packages/mcp/dist/index.js"],
-      "env": {
-        "MDREVIEW_BASE_URL": "http://localhost:3000"
+      "type": "local",
+      "command": ["npx", "-y", "@scottsus/mdreview-mcp@latest"],
+      "environment": {
+        "MDREVIEW_API_KEY": "mdr_your_key_here"
       }
     }
   }
 }
 ```
+
+**Claude Desktop** (`claude_desktop_config.json`):
+```json
+{
+  "mcpServers": {
+    "mdreview": {
+      "command": "npx",
+      "args": ["-y", "@scottsus/mdreview-mcp@latest"],
+      "env": {
+        "MDREVIEW_API_KEY": "mdr_your_key_here"
+      }
+    }
+  }
+}
+```
+
+> **Note:** Without `MDREVIEW_API_KEY`, reviews are created anonymously and are publicly accessible to anyone with the URL.
 
 ## License
 
