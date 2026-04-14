@@ -49,11 +49,15 @@ server.registerTool(
 
     const result = await apiClient.createReview(content, title);
 
+    const anonWarning = !process.env.MDREVIEW_API_KEY
+      ? "\n\n⚠️  Warning: MDREVIEW_API_KEY is not set. This review is publicly accessible to anyone with the URL."
+      : "";
+
     return {
       content: [
         {
           type: "text" as const,
-          text: `Review created successfully!\n\nReview URL: ${result.url}\n\nShare this URL with your reviewer. They can add inline comments by selecting text.\n\nUse 'get_review_status' with reviewId "${result.slug}" to check comments.`,
+          text: `Review created successfully!\n\nReview URL: ${result.url}\n\nShare this URL with your reviewer. They can add inline comments by selecting text.\n\nUse 'get_review_status' with reviewId "${result.slug}" to check comments.${anonWarning}`,
         },
       ],
       structuredContent: {
