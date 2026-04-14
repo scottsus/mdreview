@@ -1,8 +1,6 @@
 import NextAuth, { type NextAuthResult } from "next-auth"
 import authConfig from "@/auth.config"
 
-console.log("[middleware] Initializing edge auth middleware from auth.config")
-
 const { auth: middleware }: NextAuthResult = NextAuth(authConfig)
 export default middleware
 
