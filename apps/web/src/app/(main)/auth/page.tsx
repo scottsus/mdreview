@@ -1,9 +1,6 @@
-import Link from "next/link"
 import { redirect } from "next/navigation"
 import { auth, signIn } from "@/auth"
 import { Button } from "@/components/ui/button"
-
-console.log("[/auth] Auth page module loaded")
 
 interface AuthPageProps {
   searchParams: Promise<{ callbackUrl?: string }>
@@ -38,21 +35,15 @@ function GoogleIcon() {
 }
 
 export default async function AuthPage({ searchParams }: AuthPageProps) {
-  console.log("[/auth] AuthPage rendering — calling auth()")
   const session = await auth()
-  console.log("[/auth] auth() resolved", {
-    authenticated: !!session,
-    userId: session?.user?.id ?? null,
-    userEmail: session?.user?.email ?? null,
-  })
-
   const { callbackUrl } = await searchParams
-  const resolvedCallbackUrl = callbackUrl ?? "/dashboard"
-  console.log("[/auth] callbackUrl resolved", { callbackUrl, resolvedCallbackUrl })
+
+  // Sanitize callbackUrl — never redirect back to /auth (would cause a loop)
+  const safeCallbackUrl =
+    callbackUrl && !callbackUrl.startsWith("/auth") ? callbackUrl : "/dashboard"
 
   if (session?.user?.id) {
-    console.log("[/auth] Already authenticated — redirecting", { to: resolvedCallbackUrl })
-    redirect(resolvedCallbackUrl)
+    redirect(safeCallbackUrl)
   }
 
   return (
@@ -78,8 +69,7 @@ export default async function AuthPage({ searchParams }: AuthPageProps) {
           <form
             action={async () => {
               "use server"
-              console.log("[/auth] signIn server action triggered", { callbackUrl: resolvedCallbackUrl })
-              await signIn("google", { redirectTo: resolvedCallbackUrl })
+              await signIn("google", { redirectTo: safeCallbackUrl })
             }}
           >
             <Button type="submit" className="w-full gap-2" variant="outline">
