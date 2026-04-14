@@ -46,21 +46,34 @@ interface ResolveThreadResponse {
 
 export class ApiClient {
   private baseUrl: string;
+  private apiKey?: string;
 
-  constructor(baseUrl?: string) {
+  constructor(baseUrl?: string, apiKey?: string) {
     this.baseUrl = baseUrl || BASE_URL;
+    this.apiKey = apiKey;
+  }
+
+  private authHeaders(): Record<string, string> {
+    return this.apiKey ? { Authorization: `Bearer ${this.apiKey}` } : {};
   }
 
   async createReview(content: string, title?: string): Promise<CreateReviewResponse> {
     const response = await fetch(`${this.baseUrl}/api/reviews`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...this.authHeaders(),
+      },
       body: JSON.stringify({
         content,
         source: "agent",
         ...(title && { title }),
       }),
     });
+
+    if (response.status === 401) {
+      throw new Error("Authentication required. Set MDREVIEW_API_KEY environment variable with a valid API key.");
+    }
 
     if (!response.ok) {
       const error = await response.json();
@@ -71,7 +84,13 @@ export class ApiClient {
   }
 
   async getReview(reviewId: string): Promise<ReviewResponse> {
-    const response = await fetch(`${this.baseUrl}/api/reviews/${reviewId}`);
+    const response = await fetch(`${this.baseUrl}/api/reviews/${reviewId}`, {
+      headers: { ...this.authHeaders() },
+    });
+
+    if (response.status === 401) {
+      throw new Error("Authentication required. Set MDREVIEW_API_KEY environment variable with a valid API key.");
+    }
 
     if (!response.ok) {
       const error = await response.json();
@@ -86,7 +105,10 @@ export class ApiClient {
       `${this.baseUrl}/api/threads/${threadId}/replies`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...this.authHeaders(),
+        },
         body: JSON.stringify({
           body,
           authorType: "agent",
@@ -94,6 +116,10 @@ export class ApiClient {
         }),
       },
     );
+
+    if (response.status === 401) {
+      throw new Error("Authentication required. Set MDREVIEW_API_KEY environment variable with a valid API key.");
+    }
 
     if (!response.ok) {
       const error = await response.json();
@@ -106,9 +132,16 @@ export class ApiClient {
   async resolveThread(threadId: string): Promise<ResolveThreadResponse> {
     const response = await fetch(`${this.baseUrl}/api/threads/${threadId}`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...this.authHeaders(),
+      },
       body: JSON.stringify({ resolved: true }),
     });
+
+    if (response.status === 401) {
+      throw new Error("Authentication required. Set MDREVIEW_API_KEY environment variable with a valid API key.");
+    }
 
     if (!response.ok) {
       const error = await response.json();

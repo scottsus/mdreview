@@ -9,10 +9,13 @@ import { ApiClient } from "./api-client.js";
 
 const server = new McpServer({
   name: "mdreview",
-  version: "0.6.0",
+  version: "0.7.0",
 });
 
-const apiClient = new ApiClient(process.env.MDREVIEW_BASE_URL);
+const apiClient = new ApiClient(
+  process.env.MDREVIEW_BASE_URL,
+  process.env.MDREVIEW_API_KEY,
+);
 
 // Tool: request_review
 server.registerTool(

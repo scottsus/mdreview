@@ -11,6 +11,26 @@ https://markdown-review.vercel.app
 
 ---
 
+## Authentication
+
+All write operations and reads on private reviews require an API key.
+
+Generate one from the MDReview dashboard, then export it as an environment variable:
+
+```bash
+export MDREVIEW_API_KEY="mdr_<your-key>"
+```
+
+Include it as a Bearer token in every request that requires auth:
+
+```bash
+curl -H "Authorization: Bearer $MDREVIEW_API_KEY" ...
+```
+
+> **Note:** Without an API key, `POST /api/reviews` still succeeds but creates a public/ownerless review (`userId: null`). All four write operations will return `401` on private reviews if the key is absent.
+
+---
+
 ## Workflow
 
 The typical agent workflow is:
@@ -35,6 +55,7 @@ Upload markdown content to create a new review. Returns a shareable URL.
 ```bash
 curl -s -X POST https://markdown-review.vercel.app/api/reviews \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $MDREVIEW_API_KEY" \
   -d '{
     "content": "# My Document\n\nThis is the content to review.",
     "title": "Optional title",
@@ -73,7 +94,12 @@ curl -s -X POST https://markdown-review.vercel.app/api/reviews \
 Fetch the full review including all comment threads and replies.
 
 ```bash
+# Public review (no auth required)
 curl -s https://markdown-review.vercel.app/api/reviews/<slug>
+
+# Private review (auth required)
+curl -s https://markdown-review.vercel.app/api/reviews/<slug> \
+  -H "Authorization: Bearer $MDREVIEW_API_KEY"
 ```
 
 **Response:**
@@ -124,6 +150,7 @@ Open a new comment thread on a specific line range of the document.
 ```bash
 curl -s -X POST https://markdown-review.vercel.app/api/reviews/<slug>/threads \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $MDREVIEW_API_KEY" \
   -d '{
     "startLine": 3,
     "endLine": 3,
@@ -169,6 +196,7 @@ Add a reply to an existing comment thread.
 ```bash
 curl -s -X POST https://markdown-review.vercel.app/api/threads/<threadId>/replies \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $MDREVIEW_API_KEY" \
   -d '{
     "body": "Thanks for the feedback, I will update this section.",
     "authorType": "agent",
@@ -206,6 +234,7 @@ Mark a thread as resolved once the feedback has been addressed.
 ```bash
 curl -s -X PATCH https://markdown-review.vercel.app/api/threads/<threadId> \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $MDREVIEW_API_KEY" \
   -d '{"resolved": true}'
 ```
 
@@ -213,6 +242,7 @@ To reopen a thread:
 ```bash
 curl -s -X PATCH https://markdown-review.vercel.app/api/threads/<threadId> \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $MDREVIEW_API_KEY" \
   -d '{"resolved": false}'
 ```
 
@@ -234,7 +264,7 @@ curl -s -X PATCH https://markdown-review.vercel.app/api/threads/<threadId> \
 Download the full review and all comments as YAML (default) or JSON.
 
 ```bash
-# YAML (default)
+# YAML (default) — add -H "Authorization: Bearer $MDREVIEW_API_KEY" for private reviews
 curl -s "https://markdown-review.vercel.app/api/reviews/<slug>/export"
 
 # JSON
