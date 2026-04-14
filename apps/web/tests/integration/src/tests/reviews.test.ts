@@ -66,8 +66,8 @@ describe("Reviews API", () => {
       const review = await response.json();
       createdReviewIds.push(review.id);
 
-      // Fetch the full review to verify source
-      const fullReview = await getReview(review.id);
+      // Fetch the full review by slug to verify source
+      const fullReview = await getReview(review.slug);
       expect(fullReview.source).toBe("agent");
     });
 
@@ -106,8 +106,8 @@ describe("Reviews API", () => {
       createdReviewIds.push(testReview.id);
     });
 
-    it("should get a review by ID", async () => {
-      const review = await getReview(testReview.id);
+    it("should get a review by slug", async () => {
+      const review = await getReview(testReview.slug);
 
       expect(review.id).toBe(testReview.id);
       expect(review.slug).toBe(testReview.slug);
@@ -119,10 +119,9 @@ describe("Reviews API", () => {
       expect(review.updatedAt).toBeDefined();
     });
 
-    it("should return 404 for non-existent review", async () => {
-      const fakeId = "00000000-0000-0000-0000-000000000000";
+    it("should return 404 for non-existent slug", async () => {
       const response = await fetch(
-        `${config.apiBaseUrl}/api/reviews/${fakeId}`,
+        `${config.apiBaseUrl}/api/reviews/doesnotexist`,
       );
 
       expect(response.status).toBe(404);
@@ -130,15 +129,6 @@ describe("Reviews API", () => {
       const error = await response.json();
       expect(error.error).toBe("not_found");
       expect(error.message).toBe("Review not found");
-    });
-
-    it("should return 500 for invalid UUID format", async () => {
-      const response = await fetch(
-        `${config.apiBaseUrl}/api/reviews/invalid-id`,
-      );
-
-      // PostgreSQL will throw an error for invalid UUID format
-      expect(response.status).toBe(500);
     });
   });
 });

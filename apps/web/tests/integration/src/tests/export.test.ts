@@ -16,7 +16,7 @@ describe("Export API", () => {
     reviewId = review.id;
     reviewSlug = review.slug;
 
-    await createTestThread(reviewId, {
+    await createTestThread(reviewSlug, {
       startLine: 1,
       endLine: 1,
       selectedText: "# Export Test",
@@ -32,7 +32,7 @@ describe("Export API", () => {
   describe("GET /api/reviews/[id]/export", () => {
     it("should export as YAML by default", async () => {
       const response = await fetch(
-        `${config.apiBaseUrl}/api/reviews/${reviewId}/export`,
+        `${config.apiBaseUrl}/api/reviews/${reviewSlug}/export`,
       );
 
       expect(response.status).toBe(200);
@@ -51,7 +51,7 @@ describe("Export API", () => {
 
     it("should export as YAML when format=yaml", async () => {
       const response = await fetch(
-        `${config.apiBaseUrl}/api/reviews/${reviewId}/export?format=yaml`,
+        `${config.apiBaseUrl}/api/reviews/${reviewSlug}/export?format=yaml`,
       );
 
       expect(response.status).toBe(200);
@@ -60,7 +60,7 @@ describe("Export API", () => {
 
     it("should export as JSON when format=json", async () => {
       const response = await fetch(
-        `${config.apiBaseUrl}/api/reviews/${reviewId}/export?format=json`,
+        `${config.apiBaseUrl}/api/reviews/${reviewSlug}/export?format=json`,
       );
 
       expect(response.status).toBe(200);
@@ -80,7 +80,7 @@ describe("Export API", () => {
 
     it("should include thread comments in export", async () => {
       const response = await fetch(
-        `${config.apiBaseUrl}/api/reviews/${reviewId}/export?format=json`,
+        `${config.apiBaseUrl}/api/reviews/${reviewSlug}/export?format=json`,
       );
 
       const data = await response.json();
@@ -105,7 +105,7 @@ describe("Export API", () => {
 
     it("should reject invalid format", async () => {
       const response = await fetch(
-        `${config.apiBaseUrl}/api/reviews/${reviewId}/export?format=xml`,
+        `${config.apiBaseUrl}/api/reviews/${reviewSlug}/export?format=xml`,
       );
 
       expect(response.status).toBe(400);
