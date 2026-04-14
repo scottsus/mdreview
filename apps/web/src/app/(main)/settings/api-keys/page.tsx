@@ -21,7 +21,7 @@ export default async function ApiKeysPage() {
 
   if (!session?.user?.id) {
     console.log("[/settings/api-keys] ApiKeysPage: no session — redirecting to /auth")
-    redirect("/auth")
+    redirect("/auth?callbackUrl=/settings/api-keys")
   }
 
   const userId = session.user.id
