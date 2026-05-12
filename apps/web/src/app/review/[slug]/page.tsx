@@ -8,6 +8,11 @@ interface ReviewPageProps {
   params: Promise<{ slug: string }>
 }
 
+function extractTitleFromMarkdown(content: string): string | null {
+  const match = content.match(/^\s{0,3}#\s+(.+?)\s*$/m)
+  return match?.[1] ? match[1].trim() : null
+}
+
 export async function generateMetadata({ params }: ReviewPageProps): Promise<Metadata> {
   const { slug } = await params
   const result = await getReviewOrGate(slug, null)
@@ -16,7 +21,12 @@ export async function generateMetadata({ params }: ReviewPageProps): Promise<Met
     return { title: "Review Not Found" }
   }
 
-  return { title: result.review.title || "Untitled Review" }
+  return {
+    title:
+      result.review.title ||
+      extractTitleFromMarkdown(result.review.content) ||
+      "Untitled Review",
+  }
 }
 
 export default async function ReviewPage({ params }: ReviewPageProps) {
