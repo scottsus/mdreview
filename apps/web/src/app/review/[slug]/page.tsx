@@ -15,10 +15,16 @@ function extractTitleFromMarkdown(content: string): string | null {
 
 export async function generateMetadata({ params }: ReviewPageProps): Promise<Metadata> {
   const { slug } = await params
-  const result = await getReviewOrGate(slug, null)
+  const session = await auth()
+  const callerId = session?.user?.id ?? null
+  const result = await getReviewOrGate(slug, callerId)
+
+  if (result.outcome === "not_found") {
+    return { title: "Review Not Found" }
+  }
 
   if (result.outcome !== "ok") {
-    return { title: "Review Not Found" }
+    return { title: "MDReview" }
   }
 
   return {
